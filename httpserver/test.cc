@@ -9,6 +9,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <stdio.h>
 
 void setnonblocking(int sock)
 {

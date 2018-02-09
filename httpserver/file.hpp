@@ -1,6 +1,8 @@
 #ifndef HTTP_SREVER_FILE_HPP_
 #define HTTP_SREVER_FILE_HPP_
 
+#include <iostream>
+
 namespace httpserver {
 
 class File {
@@ -10,7 +12,8 @@ class File {
 
 private:
   int fd_{-1};
-}
+};
+
 } // namespace httpserver
 
 #endif // HTTP_SREVER_FILE_HPP_
