@@ -25,10 +25,10 @@ public:
     my_addr.sin_port = htons(std::atoi(port_.c_str()));
     inet_aton(ip_.c_str(), &my_addr.sin_addr);
     listen_fd_ = socket(AF_INET, SOCK_STREAM, 0);
-    auto ret = bind(listen_fd_, (struct sockaddr*)&my_addr, sizeof(my_addr));
-    ret = listen(listen_fd_, 1024);
+    bind(listen_fd_, (struct sockaddr*)&my_addr, sizeof(my_addr));
+    listen(listen_fd_, 1024);
 
-    struct epoll_event ev, events[10];
+    struct epoll_event ev;
     epollfd_ = epoll_create1(0);
     ev.events = EPOLLIN;
     ev.data.fd = listen_fd_;
@@ -61,7 +61,7 @@ public:
   void handleEvent() {
     struct sockaddr_in local;
     socklen_t addrlen;
-    int  conn_sock, nfds;
+    int  conn_sock;
     for (;;) {
       int nfds = epoll_wait(epollfd_, events_, 10, -1);
       for (int n = 0; n < nfds; ++n) {
