@@ -39,7 +39,19 @@ public:
     }
   }
 
+  void handle_buffer() {
+    char *p = buffer_;
+    std::string requestline;
+    while (*p != '\n') {
+      std::cout << *p << '\n';
+      requestline.push_back(*p);
+      *p++;
+    }
+    std::cout << requestline << '\n';
+  }
+
   void handle_read(int client_fd) {
+    memset(buffer_, 0, sizeof(buffer_));
     std::size_t readlen = read(client_fd, buffer_, sizeof(buffer_));
     printf("%s\n", buffer_);
 
