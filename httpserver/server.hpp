@@ -19,7 +19,7 @@ namespace httpserver {
 
 class HttpServer {
 public:
-  explicit HttpServer(const std::string& ip = "0.0.0.0", const std::string& port = "8888", const std::string rootdir = "/var/www") : ip_(ip), port_(port), rootdir_(rootdir) {
+  explicit HttpServer(const std::string& ip = "0.0.0.0", const std::string& port = "9999", const std::string rootdir = "/var/www") : ip_(ip), port_(port), rootdir_(rootdir) {
     struct sockaddr_in my_addr;
     memset(&my_addr, 0, sizeof(my_addr));
     my_addr.sin_family = AF_INET;
@@ -39,21 +39,12 @@ public:
     }
   }
 
-  void handle_buffer() {
-    char *p = buffer_;
-    std::string requestline;
-    while (*p != '\n') {
-      std::cout << *p << '\n';
-      requestline.push_back(*p);
-      *p++;
-    }
-    std::cout << requestline << '\n';
-  }
-
   void handle_read(int client_fd) {
     memset(buffer_, 0, sizeof(buffer_));
     std::size_t readlen = read(client_fd, buffer_, sizeof(buffer_));
-    printf("%s\n", buffer_);
+    ParseUri parseuri;
+    parseuri.handleParseUri(buffer_);
+    //handle_buffer();
 
     const char str[] = "God bless you!\n";
     if (send(client_fd,  str,  sizeof(str),  0) == -1)

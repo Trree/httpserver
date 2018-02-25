@@ -8,10 +8,13 @@ class ParseUri {
 public:
   ParseUri() : uri_(""), method_("GET"), path_("/") {}
   std::string handleParseUri(char* buffer) {
+    char *p = buffer;
     std::string requestline;
-    while (*buffer && *buffer  != '\n') {
-      requestline.append(buffer);
+    while (*p != '\n') {
+      requestline.push_back(*p);
+      *p++;
     }
+    std::cout << requestline << '\n';
     return requestline;
   }
 
