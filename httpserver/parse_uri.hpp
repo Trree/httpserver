@@ -23,6 +23,10 @@ public:
     handleRequestUri(requestline);
   }
 
+  std::string getFilepath(std::string rootdir) {
+    return rootdir.append(requesturi_);
+  }
+
   const std::string getMethod() const {
     return method_;
   }

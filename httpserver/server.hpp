@@ -14,12 +14,16 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <fstream>
 
 namespace httpserver {
 
 class HttpServer {
 public:
-  explicit HttpServer(const std::string& ip = "0.0.0.0", const std::string& port = "9999", const std::string rootdir = "/var/www") : ip_(ip), port_(port), rootdir_(rootdir) {
+  explicit HttpServer(const std::string& ip = "0.0.0.0", 
+                      const std::string& port = "9999", 
+                      const std::string rootdir = "/var/www/html/") 
+  : ip_(ip), port_(port), rootdir_(rootdir) {
     struct sockaddr_in my_addr;
     memset(&my_addr, 0, sizeof(my_addr));
     my_addr.sin_family = AF_INET;
@@ -43,12 +47,13 @@ public:
     memset(buffer_, 0, sizeof(buffer_));
     std::size_t readlen = read(client_fd, buffer_, sizeof(buffer_));
     ParseUri parseuri(buffer_);
-    std::cout << parseuri.getMethod() << '\n';
-    std::cout << parseuri.getRequestUri() << '\n';
-    std::cout << parseuri.getVersion() << '\n';
-
-    const char str[] = "God bless you!\n";
-    if (send(client_fd,  str,  sizeof(str),  0) == -1)
+    std::string filepath = parseuri.getFilepath(rootdir_);
+    
+    std::ifstream t(filepath);
+    std::string str((std::istreambuf_iterator<char>(t)),
+                    std::istreambuf_iterator<char>());
+    
+    if (send(client_fd,  str.c_str(),  str.size(),  0) == -1)
       perror("send");
     close(client_fd);
   }
