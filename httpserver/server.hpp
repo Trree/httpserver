@@ -42,9 +42,10 @@ public:
   void handle_read(int client_fd) {
     memset(buffer_, 0, sizeof(buffer_));
     std::size_t readlen = read(client_fd, buffer_, sizeof(buffer_));
-    ParseUri parseuri;
-    parseuri.handleParseUri(buffer_);
-    //handle_buffer();
+    ParseUri parseuri(buffer_);
+    std::cout << parseuri.getMethod() << '\n';
+    std::cout << parseuri.getRequestUri() << '\n';
+    std::cout << parseuri.getVersion() << '\n';
 
     const char str[] = "God bless you!\n";
     if (send(client_fd,  str,  sizeof(str),  0) == -1)
@@ -99,6 +100,7 @@ private:
   int epollfd_;
   struct epoll_event events_[10];
   char buffer_[1024];
+  
 
   std::string ip_;
   std::string port_;
