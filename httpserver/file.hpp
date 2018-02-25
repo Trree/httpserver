@@ -8,6 +8,7 @@ namespace httpserver {
 class File {
   File(int fd) : fd_(fd) {}
   File(const File&) = delete;
+  File& operator=(File&) = delete;
   File(File&& other) : fd_(std::move(other.fd_)) {}
 
 private:

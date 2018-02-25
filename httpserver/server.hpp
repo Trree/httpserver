@@ -1,6 +1,6 @@
 #ifndef HTTP_SREVER_SERVER_HPP_
 #define HTTP_SREVER_SERVER_HPP_ 
-#include "file.hpp"
+
 #include "parse_uri.hpp"
 #include "response.hpp"
 #include <sys/types.h>
@@ -24,15 +24,7 @@ public:
                       const std::string& port = "9999", 
                       const std::string rootdir = "/var/www/html/") 
   : ip_(ip), port_(port), rootdir_(rootdir) {
-    struct sockaddr_in my_addr;
-    memset(&my_addr, 0, sizeof(my_addr));
-    my_addr.sin_family = AF_INET;
-    my_addr.sin_port = htons(std::atoi(port_.c_str()));
-    inet_aton(ip_.c_str(), &my_addr.sin_addr);
-    listen_fd_ = socket(AF_INET, SOCK_STREAM, 0);
-    bind(listen_fd_, (struct sockaddr*)&my_addr, sizeof(my_addr));
-    listen(listen_fd_, 1024);
-
+    init();
     struct epoll_event ev;
     epollfd_ = epoll_create1(0);
     ev.events = EPOLLIN;
@@ -42,6 +34,8 @@ public:
       exit(EXIT_FAILURE);
     }
   }
+  HttpServer(const HttpServer&) = delete;
+  HttpServer& operator=(HttpServer&) = delete;
 
   void handle_read(int client_fd) {
     memset(buffer_, 0, sizeof(buffer_));
@@ -80,14 +74,33 @@ public:
   }
 
 private:
+
+  void init() {
+    struct sockaddr_in my_addr;
+    memset(&my_addr, 0, sizeof(my_addr));
+    my_addr.sin_family = AF_INET;
+    my_addr.sin_port = htons(std::atoi(port_.c_str()));
+    inet_aton(ip_.c_str(), &my_addr.sin_addr);
+    listen_fd_ = socket(AF_INET, SOCK_STREAM, 0);
+    if (listen_fd_ < 0) {
+      throw std::system_error(errno, std::system_category(), "socket failed");
+    }
+    int ret = bind(listen_fd_, (struct sockaddr*)&my_addr, sizeof(my_addr));
+    if (ret < 0) {
+      throw std::system_error(errno, std::system_category(), "bind failed");
+    }
+    ret = listen(listen_fd_, 1024);
+    if (ret < 0) {
+      throw std::system_error(errno, std::system_category(), "listen failed");
+    }
+  }
   
   int handleAccept() {
     struct sockaddr_in local;
     socklen_t addrlen;
     int conn_sock = accept(listen_fd_, (struct sockaddr *) &local, &addrlen);
     if (conn_sock == -1) {
-      perror("accept");
-      exit(EXIT_FAILURE);
+      throw std::system_error(errno, std::system_category(), "accept failed");
     }
     setnonblocking(conn_sock);
     return conn_sock;
