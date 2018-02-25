@@ -3,6 +3,7 @@
 
 #include "file.hpp"
 #include "parse_uri.hpp"
+#include "response.hpp"
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/epoll.h>
@@ -47,13 +48,10 @@ public:
     memset(buffer_, 0, sizeof(buffer_));
     std::size_t readlen = read(client_fd, buffer_, sizeof(buffer_));
     ParseUri parseuri(buffer_);
-    std::string filepath = parseuri.getFilepath(rootdir_);
-    
-    std::ifstream t(filepath);
-    std::string str((std::istreambuf_iterator<char>(t)),
-                    std::istreambuf_iterator<char>());
-    
-    if (send(client_fd,  str.c_str(),  str.size(),  0) == -1)
+    Response re(rootdir_, parseuri.getRequestUri());
+    std::string response = re.getResponse();
+
+    if (send(client_fd, response.c_str(),  response.size(),  0) == -1)
       perror("send");
     close(client_fd);
   }
