@@ -17,6 +17,7 @@
 #include <netdb.h> 
 #include <memory>
 #include <map>
+#include <exception>
 
 namespace httpserver {
  
@@ -98,17 +99,20 @@ private:
     inet_aton(ip_.c_str(), &my_addr.sin_addr);
     listen_fd_ = socket(AF_INET, SOCK_STREAM, 0);
     if (listen_fd_ < 0) {
-      throw std::system_error(errno, std::system_category(), "socket failed");
+      perror("socket");
+      exit(EXIT_FAILURE);
     }
     reuse = 1;
     ret = setsockopt( listen_fd_, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
     ret = bind(listen_fd_, (struct sockaddr*)&my_addr, sizeof(my_addr));
     if (ret < 0) {
-      throw std::system_error(errno, std::system_category(), "bind failed");
+      perror("bind");
+      exit(EXIT_FAILURE);
     }
     ret = listen(listen_fd_, 1024);
     if (ret < 0) {
-      throw std::system_error(errno, std::system_category(), "listen failed");
+      perror("listen");
+      exit(EXIT_FAILURE);
     }
   }
  
@@ -117,7 +121,8 @@ private:
     socklen_t addrlen = sizeof(client);
     int conn_sock = accept(listen_fd, (struct sockaddr *) &client, &addrlen);
     if (conn_sock == -1) {
-      throw std::system_error(errno, std::system_category(), "accept failed");
+      perror("listen");
+      exit(EXIT_FAILURE);
     }
 
     char clntName[INET6_ADDRSTRLEN];
