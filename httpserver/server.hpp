@@ -57,15 +57,7 @@ public:
       int nfds = epoll_wait(epollfd_, events_, 10, -1);
       for (int n = 0; n < nfds; ++n) {
         if (events_[n].data.fd == listen_fd_) {
-          int conn_sock = handleAccept();
-          struct epoll_event ev;
-          ev.events = EPOLLIN | EPOLLET;
-          ev.data.fd = conn_sock;
-          if (epoll_ctl(epollfd_, EPOLL_CTL_ADD, conn_sock,
-                        &ev) == -1) {
-                          perror("epoll_ctl: conn_sock");
-                          exit(EXIT_FAILURE);
-                        }
+          handleAccept();
         } else {
           handle_read(events_[n].data.fd);
         }
@@ -95,7 +87,7 @@ private:
     }
   }
   
-  int handleAccept() {
+  void handleAccept() {
     struct sockaddr_in client;
     socklen_t addrlen = sizeof(client);
     int conn_sock = accept(listen_fd_, (struct sockaddr *) &client, &addrlen);
@@ -103,7 +95,14 @@ private:
       throw std::system_error(errno, std::system_category(), "accept failed");
     }
     setnonblocking(conn_sock);
-    return conn_sock;
+    struct epoll_event ev;
+    ev.events = EPOLLIN | EPOLLET;
+    ev.data.fd = conn_sock;
+    if (epoll_ctl(epollfd_, EPOLL_CTL_ADD, conn_sock,
+                  &ev) == -1) {
+      perror("epoll_ctl: conn_sock");
+      exit(EXIT_FAILURE);
+    }
   }
 
   void setnonblocking(int sock){
