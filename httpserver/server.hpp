@@ -96,9 +96,9 @@ private:
   }
   
   int handleAccept() {
-    struct sockaddr_in local;
-    socklen_t addrlen;
-    int conn_sock = accept(listen_fd_, (struct sockaddr *) &local, &addrlen);
+    struct sockaddr_in client;
+    socklen_t addrlen = sizeof(client);
+    int conn_sock = accept(listen_fd_, (struct sockaddr *) &client, &addrlen);
     if (conn_sock == -1) {
       throw std::system_error(errno, std::system_category(), "accept failed");
     }
