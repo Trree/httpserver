@@ -1,6 +1,5 @@
 #ifndef HTTP_SREVER_SERVER_HPP_
-#define HTTP_SREVER_SERVER_HPP_
-
+#define HTTP_SREVER_SERVER_HPP_ 
 #include "file.hpp"
 #include "parse_uri.hpp"
 #include "response.hpp"
@@ -46,7 +45,10 @@ public:
 
   void handle_read(int client_fd) {
     memset(buffer_, 0, sizeof(buffer_));
-    std::size_t readlen = read(client_fd, buffer_, sizeof(buffer_));
+    ssize_t readlen = read(client_fd, buffer_, sizeof(buffer_));
+    if (readlen <= 0) {
+      perror("read failed");
+    }
     ParseUri parseuri(buffer_);
     Response re(rootdir_, parseuri.getRequestUri());
     std::string response = re.getResponse();
@@ -57,19 +59,11 @@ public:
   }
 
   void handleEvent() {
-    struct sockaddr_in local;
-    socklen_t addrlen;
-    int  conn_sock;
     for (;;) {
       int nfds = epoll_wait(epollfd_, events_, 10, -1);
       for (int n = 0; n < nfds; ++n) {
         if (events_[n].data.fd == listen_fd_) {
-          conn_sock = accept(listen_fd_, (struct sockaddr *) &local, &addrlen);
-          if (conn_sock == -1) {
-            perror("accept");
-            exit(EXIT_FAILURE);
-          }
-          setnonblocking(conn_sock);
+          int conn_sock = handleAccept();
           struct epoll_event ev;
           ev.events = EPOLLIN | EPOLLET;
           ev.data.fd = conn_sock;
@@ -86,6 +80,19 @@ public:
   }
 
 private:
+  
+  int handleAccept() {
+    struct sockaddr_in local;
+    socklen_t addrlen;
+    int conn_sock = accept(listen_fd_, (struct sockaddr *) &local, &addrlen);
+    if (conn_sock == -1) {
+      perror("accept");
+      exit(EXIT_FAILURE);
+    }
+    setnonblocking(conn_sock);
+    return conn_sock;
+  }
+
   void setnonblocking(int sock){
     int opts;
     if ((opts = fcntl(sock, F_GETFL)) < 0) {

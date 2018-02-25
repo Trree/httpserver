@@ -47,8 +47,8 @@ int handle_date(std::string& ip, std::string& port)
     my_addr.sin_port = htons(std::atoi(port.c_str()));
     inet_aton(ip.c_str(), &my_addr.sin_addr);
     listen_sock = socket(AF_INET, SOCK_STREAM, 0);
-    auto ret = bind(listen_sock, (struct sockaddr*)&my_addr, sizeof(my_addr));
-    ret = listen(listen_sock, 1024);
+    bind(listen_sock, (struct sockaddr*)&my_addr, sizeof(my_addr));
+    listen(listen_sock, 1024);
 
     epollfd = epoll_create1(0);
     if (epollfd == -1) {

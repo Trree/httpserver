@@ -17,14 +17,9 @@ public:
     char *p = buffer;
     std::string requestline;
     while (*p != '\n') {
-      requestline.push_back(*p);
-      *p++;
+      requestline.push_back(*p++);
     }
     handleRequestUri(requestline);
-  }
-
-  std::string getFilepath(std::string rootdir) {
-    return rootdir.append(requesturi_);
   }
 
   const std::string getMethod() const {
