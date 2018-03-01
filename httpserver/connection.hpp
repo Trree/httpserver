@@ -15,20 +15,19 @@ public:
   Connection(int fd) : conn_fd_(fd), req_(fd) {}
   Connection(const Connection&) = delete;
   Connection& operator=(Connection&) = delete;
-  ~Connection(){}
-
+  ~Connection() {
+    close(conn_fd_);
+    conn_fd_ = -1;
+  }
+  
   bool handleConnection() {
     req_.handleRead();
     std::string response = req_.handleResponse();
     req_.handleWrite(response);
     return true;
   }
-
-  ~Connection() {
-    close(conn_fd_);
-  }
 private:
-  int conn_fd_;
+  int conn_fd_ = -1;
   Request req_;
 };
 
