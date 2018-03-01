@@ -7,10 +7,18 @@ namespace httpserver {
 
 class Event {
 public:
-  struct epoll_event events_[100];
-  
-  Event() {
-    epollfd_ = epoll_create1(0);
+  Event() : epollfd_(epoll_create1(0)), events_(new epoll_event[100]) {}
+
+  ~Event() {
+    if (close(epollfd_) == -1) {
+      std::cout << "close epollfd faied" << '\n';
+    }
+    epollfd_ = -1;
+
+
+    if (events_) {
+      delete [] events_;
+    }
   }
 
   void add(int fd) {
@@ -28,7 +36,9 @@ public:
   }
 
 private:
-  int epollfd_;
+  int epollfd_ = -1;
+public:
+  struct epoll_event *events_;
 };
 
 }
