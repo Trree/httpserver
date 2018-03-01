@@ -2,6 +2,7 @@
 #define HTTP_SREVER_SERVER_HPP_ 
 
 #include "connection.hpp"
+#include "event.hpp"
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/epoll.h>
@@ -12,44 +13,35 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <netdb.h>
 
 namespace httpserver {
-
 
 class HttpServer {
 public:
   explicit HttpServer(const std::string& ip = "0.0.0.0", 
                       const std::string& port = "9999", 
                       const std::string rootdir = "/var/www/html/") 
-  : ip_(ip), port_(port), rootdir_(rootdir) {
+  : ip_(ip), port_(port), rootdir_(rootdir), event_(){
     bindAndListen();
-    struct epoll_event ev;
-    epollfd_ = epoll_create1(0);
-    ev.events = EPOLLIN;
-    ev.data.fd = listen_fd_;
-    if (epoll_ctl(epollfd_, EPOLL_CTL_ADD, listen_fd_, &ev) == -1) {
-      perror("epoll_ctl: listen_fd_");
-      exit(EXIT_FAILURE);
-    }
+    event_.add(listen_fd_);
   }
   HttpServer(const HttpServer&) = delete;
   HttpServer& operator=(HttpServer&) = delete;
 
   void handleEvent() {
     for (;;) {
-      int nfds = epoll_wait(epollfd_, events_, 10, -1);
+      int nfds = epoll_wait(event_.getEpollFd(), event_.events_, 100, -1);
+      if (nfds <= 0) {
+        std::cout << "epoll wait return bad" << '\n';
+        continue;
+      }
       for (int n = 0; n < nfds; ++n) {
-        if (events_[n].data.fd == listen_fd_) {
+        if (event_.events_[n].data.fd == listen_fd_) {
           int conn_sock = handleAccept();
-          struct epoll_event ev;
-          ev.events = EPOLLIN | EPOLLET;
-          ev.data.fd = conn_sock;
-          if (epoll_ctl(epollfd_, EPOLL_CTL_ADD, conn_sock, &ev) == -1) {
-            perror("epoll_ctl: conn_sock");
-            exit(EXIT_FAILURE);
-          }
+          event_.add(conn_sock);
         } else {
-          Connection c(events_[n].data.fd);
+          Connection c(event_.events_[n].data.fd);
           c.handleConnection();
         }
       }
@@ -85,6 +77,19 @@ private:
     if (conn_sock == -1) {
       throw std::system_error(errno, std::system_category(), "accept failed");
     }
+
+    char clntName[INET6_ADDRSTRLEN];
+    char portName[6];
+    if(getnameinfo((const sockaddr*)&client, sizeof(client),
+                   clntName, sizeof(clntName),
+                   portName, sizeof(portName),
+                   NI_NUMERICHOST|NI_NUMERICSERV)==0){
+      std::cout << "client addr: " << clntName << ':' << portName << '\n';
+    } else {
+      std::cout << "Unable to get address" << '\n';
+    }
+    std::cout << "the connect fd is: " << conn_sock << '\n';
+
     setNonBlocking(conn_sock);
     return conn_sock;
   }
@@ -102,12 +107,12 @@ private:
     }
   }
 
-  int listen_fd_;
-  int epollfd_;
-  struct epoll_event events_[10];
   std::string ip_;
   std::string port_;
   std::string rootdir_;
+  int listen_fd_;
+  Event event_;
+
 };
 
 } //namespace httpserver
