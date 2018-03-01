@@ -13,6 +13,9 @@ namespace httpserver {
 class Connection {
 public:
   Connection(int fd) : conn_fd_(fd), req_(fd) {}
+  Connection(const Connection&) = delete;
+  Connection& operator=(Connection&) = delete;
+  ~Connection(){}
 
   bool handleConnection() {
     req_.handleRead();

@@ -8,6 +8,8 @@ namespace httpserver {
 class Event {
 public:
   Event() : epollfd_(epoll_create1(0)), events_(new epoll_event[100]) {}
+  Event(const Event&) = delete;
+  Event& operator=(Event&) = delete;
 
   ~Event() {
     if (close(epollfd_) == -1) {

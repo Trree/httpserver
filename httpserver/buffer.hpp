@@ -13,6 +13,9 @@ public:
     memset(buffer_, 0, 1024);
   }
 
+  Buffer(const Buffer&) = delete;
+  Buffer& operator=(Buffer&) = delete;
+
   char* getBuffer() {
     return buffer_;
   }
