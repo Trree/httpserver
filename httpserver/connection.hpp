@@ -1,10 +1,32 @@
 #ifndef HTTP_SREVER_CONNECTION_HPP_
 #define HTTP_SREVER_CONNECTION_HPP_
 
+#include "request.hpp"
+#include "response.hpp"
+#include <string.h>
+#include <unistd.h>
+
+#define MAXLEN 1024
+
 namespace httpserver {
 
 class Connection {
+public:
+  Connection(int fd) : conn_fd_(fd), req_(fd) {}
 
+  bool handleConnection() {
+    req_.handleRead();
+    std::string response = req_.handleResponse();
+    req_.handleWrite(response);
+    return true;
+  }
+
+  ~Connection() {
+    close(conn_fd_);
+  }
+private:
+  int conn_fd_;
+  Request req_;
 };
 
 

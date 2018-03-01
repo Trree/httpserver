@@ -22,6 +22,9 @@ public:
     handleRequestUri(requestline);
   }
 
+  ParseUri(const ParseUri&) = delete;
+  ParseUri& operator=(ParseUri&) = delete;
+
   const std::string getMethod() const {
     return method_;
   }

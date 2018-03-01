@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 #include <utility>
 #include <fstream>
 #include <iterator>
@@ -33,7 +34,10 @@ public:
     response_.append("\r\n");
   }
 
-  std::string getResponse() {
+  Response(const Response&) = delete;
+  Response& operator=(Response&) = delete;
+
+  const std::string getResponse() {
     return response_.append(body_);
   }
 
