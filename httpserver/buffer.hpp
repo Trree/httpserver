@@ -8,9 +8,9 @@ namespace httpserver {
 
 class Buffer {
 public:
-  Buffer() : request_(""), ready_(false)  {
-    buffer_ = new char[1024];
-    memset(buffer_, 0, 1024);
+  Buffer(int size) : request_(""), readlen_(0), ready_(false)  {
+    buffer_ = new char[size];
+    memset(buffer_, 0, size);
   }
 
   Buffer(const Buffer&) = delete;
@@ -27,6 +27,15 @@ public:
   bool isReady() const {
     return ready_;
   }
+
+  void setReadlen(int size) {
+    readlen_ = size; 
+  }
+
+  int getReadlen() const {
+    return readlen_;
+  }
+
 
   bool isComplete() {
     char *p = buffer_;
@@ -53,6 +62,7 @@ public:
 private:
   char *buffer_;
   std::string request_;
+  size_t readlen_;
   bool ready_;
 };
 

@@ -23,9 +23,9 @@ public:
     }
   }
 
-  void add(int fd) {
+  void add(int fd, uint32_t event) {
     struct epoll_event ev;
-    ev.events = EPOLLIN | EPOLLET;
+    ev.events = event;
     ev.data.fd = fd;
     if (epoll_ctl(epollfd_, EPOLL_CTL_ADD, fd, &ev) == -1) {
       perror("epoll_ctl: fd_");

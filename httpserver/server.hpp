@@ -24,7 +24,7 @@ public:
                       const std::string rootdir = "/var/www/html/") 
   : ip_(ip), port_(port), rootdir_(rootdir), event_(){
     bindAndListen();
-    event_.add(listen_fd_);
+    event_.add(listen_fd_, EPOLLIN);
   }
   HttpServer(const HttpServer&) = delete;
   HttpServer& operator=(HttpServer&) = delete;
@@ -39,7 +39,7 @@ public:
       for (int n = 0; n < nfds; ++n) {
         if (event_.events_[n].data.fd == listen_fd_) {
           int conn_sock = handleAccept();
-          event_.add(conn_sock);
+          event_.add(conn_sock, EPOLLIN | EPOLLET);
         } else {
           Connection c(event_.events_[n].data.fd);
           c.handleConnection();
