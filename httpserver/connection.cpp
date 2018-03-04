@@ -20,6 +20,7 @@ void Connection::stop()
 {
   close(fd_);
   fd_ = -1;
+  connections_manager_.stop(shared_from_this());
 }
 
 int Connection::getFd() 
@@ -31,7 +32,6 @@ void Connection::setFd(int fd)
 {
   fd_ = fd;
 }
-
 
 int Connection::handleWrite(std::string response)
 {
@@ -67,6 +67,7 @@ bool Connection::handleRead()
   int rlen = Read(buffer, len);
   if (rlen <= 0) {
     stop();
+    throw std::logic_error("read return zero. so close.");
   }
   if (!isComplete(buffer_.getBuffer())) {
     return false;
