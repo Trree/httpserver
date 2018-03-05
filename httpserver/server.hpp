@@ -26,6 +26,10 @@ public:
     bindAndListen();
     event_.add(listen_fd_, EPOLLIN);
   }
+  ~HttpServer() {
+    close(listen_fd_);
+    listen_fd_ = -1;
+  }
   HttpServer(const HttpServer&) = delete;
   HttpServer& operator=(HttpServer&) = delete;
 
@@ -51,6 +55,8 @@ public:
 private:
 
   void bindAndListen() {
+    int ret;
+    int reuse;
     struct sockaddr_in my_addr;
     memset(&my_addr, 0, sizeof(my_addr));
     my_addr.sin_family = AF_INET;
@@ -60,7 +66,9 @@ private:
     if (listen_fd_ < 0) {
       throw std::system_error(errno, std::system_category(), "socket failed");
     }
-    int ret = bind(listen_fd_, (struct sockaddr*)&my_addr, sizeof(my_addr));
+    reuse = 1;
+    ret = setsockopt( listen_fd_, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
+    ret = bind(listen_fd_, (struct sockaddr*)&my_addr, sizeof(my_addr));
     if (ret < 0) {
       throw std::system_error(errno, std::system_category(), "bind failed");
     }
@@ -110,7 +118,7 @@ private:
   std::string ip_;
   std::string port_;
   std::string rootdir_;
-  int listen_fd_;
+  int listen_fd_ = -1;
   Event event_;
 
 };

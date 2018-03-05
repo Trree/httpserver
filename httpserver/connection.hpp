@@ -10,7 +10,7 @@
 #include <sys/socket.h>
 #include <string>
 
-#define MAXLEN 10
+#define MAXLEN 1024
 #define MMAXLEN 8192
 
 namespace httpserver {
