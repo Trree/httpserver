@@ -16,11 +16,24 @@ public:
   Buffer(const Buffer&) = delete;
   Buffer& operator=(Buffer&) = delete;
 
+  void expandBuffer(int size) {
+    if (buffer_) {
+      delete [] buffer_;
+    }
+    buffer_ =  new char[size];
+    memset(buffer_, 0, size);
+  }
+
   char* getBuffer() {
     return buffer_;
   }
 
-  std::string getRequest() {
+  std::string getRequest(){
+    return request_;
+  }
+
+  std::string syncRequest() {
+    request_ += buffer_;
     return request_;
   }
 
@@ -38,15 +51,11 @@ public:
 
 
   bool isComplete() {
-    char *p = buffer_;
-    while (*p != '\0') {
-      if (*p++ == '\r') {
-        if (strncmp(p, "\n\r\n", 3) == 0) {
-          return true;
-        }
-      }
+    auto n = request_.find("\r\n\r\n");
+    if (n == std::string::npos) {
+      return false;
     }
-    return false;
+    return true;
   }
 
   void setReady() {

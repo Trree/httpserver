@@ -10,7 +10,7 @@
 #include <sys/socket.h>
 #include <string>
 
-#define MAXLEN 1024
+#define MAXLEN 10
 #define MMAXLEN 8192
 
 namespace httpserver {
@@ -29,6 +29,7 @@ public:
     size_t size = MAXLEN;
     int len = Read(buffer_.getBuffer(), size);
     buffer_.setReadlen(len);
+    buffer_.syncRequest();
     if (checkComplete()) {
       std::string response = handleResponse();
       handleWrite(response);
@@ -62,7 +63,9 @@ public:
   bool checkComplete() {
     if (!buffer_.isComplete()) {
       size_t expandsize = MMAXLEN;
-      Read(buffer_.getBuffer() +  buffer_.getReadlen(),expandsize);
+      buffer_.expandBuffer(expandsize);
+      Read(buffer_.getBuffer(), expandsize);
+      buffer_.syncRequest();
       if (!buffer_.isComplete()) {
         return false;
       }
@@ -80,7 +83,7 @@ public:
 
   std::string handleResponse() {
     std::string response;
-    ParseUri parseuri(buffer_.getBuffer());
+    ParseUri parseuri(buffer_.getRequest());
     std::string rootdir("/var/www/html");
     Response re(rootdir, parseuri.getRequestUri());
     response = re.getResponse();

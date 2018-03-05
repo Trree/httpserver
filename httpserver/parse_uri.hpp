@@ -13,12 +13,9 @@ namespace httpserver {
 
 class ParseUri {
 public:
-  explicit ParseUri(char* buffer) : method_("GET"), requesturi_("/index.html"), version_("HTTP/1.1") {
-    char *p = buffer;
-    std::string requestline;
-    while (*p != '\n') {
-      requestline.push_back(*p++);
-    }
+  explicit ParseUri(std::string request) : method_("GET"), requesturi_("/index.html"), version_("HTTP/1.1") {
+    auto n = request.find("\r\n");
+    std::string requestline = request.substr(0, n);
     handleRequestUri(requestline);
   }
 
