@@ -32,8 +32,9 @@ public:
     return request_;
   }
 
-  std::string syncRequest() {
-    request_ += buffer_;
+  std::string syncRequest(int size) {
+    std::string s(buffer_, size);
+    request_ += s;
     return request_;
   }
 
