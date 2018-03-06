@@ -37,6 +37,7 @@ public:
     for (;;) {
       try {
         int nfds = epoll_wait(event_.getEpollFd(), event_.events_, 100, -1);
+        std::cout << "epoll wait return " << nfds << '\n';
         if (nfds <= 0) {
           std::cout << "epoll wait return bad" << '\n';
           continue;

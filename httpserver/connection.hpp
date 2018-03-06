@@ -28,7 +28,6 @@ public:
   bool handleConnection() {
     size_t size = MAXLEN;
     int len = Read(buffer_.getBuffer(), size);
-    buffer_.setReadlen(len);
     buffer_.syncRequest(len);
     if (checkComplete()) {
       std::string response = handleResponse();
@@ -92,7 +91,7 @@ public:
   }
 
 private:
-  int fd_ = -1;
+  int fd_{-1};
   Buffer buffer_;
 };
 

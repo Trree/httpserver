@@ -38,7 +38,7 @@ public:
   }
 
 private:
-  int epollfd_ = -1;
+  int epollfd_{-1};
 public:
   struct epoll_event *events_;
 };

@@ -8,7 +8,7 @@ namespace httpserver {
 
 class Buffer {
 public:
-  Buffer(int size) : request_(""), readlen_(0), ready_(false)  {
+  Buffer(int size) : request_(""), ready_(false)  {
     buffer_ = new char[size];
     memset(buffer_, 0, size);
   }
@@ -42,15 +42,6 @@ public:
     return ready_;
   }
 
-  void setReadlen(int size) {
-    readlen_ = size; 
-  }
-
-  int getReadlen() const {
-    return readlen_;
-  }
-
-
   bool isComplete() {
     auto n = request_.find("\r\n\r\n");
     if (n == std::string::npos) {
@@ -72,7 +63,6 @@ public:
 private:
   char *buffer_;
   std::string request_;
-  size_t readlen_;
   bool ready_;
 };
 
