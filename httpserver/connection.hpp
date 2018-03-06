@@ -67,6 +67,7 @@ public:
       int size = Read(buffer_.getBuffer(), expandsize);
       buffer_.syncRequest(size);
       if (!buffer_.isComplete()) {
+        std::runtime_error("http头读取不完整");
         return false;
       }
     }
