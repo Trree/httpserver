@@ -8,33 +8,22 @@ namespace httpserver {
 
 class Buffer {
 public:
-  Buffer(int size) : request_(""), ready_(false)  {
-    buffer_ = new char[size];
-    memset(buffer_, 0, size);
+  Buffer() {}
+
+  Buffer(char* buffer, int size) {
+    request_.assign(buffer, size);
   }
 
   Buffer(const Buffer&) = delete;
   Buffer& operator=(Buffer&) = delete;
 
-  void expandBuffer(int size) {
-    if (buffer_) {
-      delete [] buffer_;
-    }
-    buffer_ =  new char[size];
-    memset(buffer_, 0, size);
-  }
-
-  char* getBuffer() {
-    return buffer_;
-  }
-
-  std::string getRequest(){
+  std::string assignBuffer(char* buffer, int size) {
+    std::string s(buffer, size);
+    request_ += s;
     return request_;
   }
 
-  std::string syncRequest(int size) {
-    std::string s(buffer_, size);
-    request_ += s;
+  std::string getBuffer(){
     return request_;
   }
 
@@ -42,28 +31,15 @@ public:
     return ready_;
   }
 
-  bool isComplete() {
-    auto n = request_.find("\r\n\r\n");
-    if (n == std::string::npos) {
-      return false;
-    }
-    return true;
-  }
-
   void setReady() {
     ready_ = 1;
   }
 
-  ~Buffer() {
-    if (buffer_) {
-      delete [] buffer_;
-    }
-  }
+  ~Buffer() {}
 
 private:
-  char *buffer_;
   std::string request_;
-  bool ready_;
+  bool ready_ = false;
 };
 
 } // namespace httpserver

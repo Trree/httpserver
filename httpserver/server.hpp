@@ -37,18 +37,29 @@ public:
     for (;;) {
       try {
         int nfds = epoll_wait(event_.getEpollFd(), event_.events_, 100, -1);
-        std::cout << "epoll wait return " << nfds << '\n';
-        if (nfds <= 0) {
-          std::cout << "epoll wait return bad" << '\n';
+        if (nfds < 0) {
+          std::cout << "epoll_wait() error" << errno << strerror(errno) << '\n';
           continue;
         }
         for (int n = 0; n < nfds; ++n) {
-          if (event_.events_[n].data.fd == listen_fd_) {
-            int conn_sock = handleAccept();
-            event_.add(conn_sock, EPOLLIN | EPOLLET);
-          } else {
-            Connection c(event_.events_[n].data.fd);
-            c.handleConnection();
+          auto event = event_.events_[n];
+          auto revents = event.events;
+          if (revents & (EPOLLERR | EPOLLHUP)) {
+            std::cout << "epoll_wait() error on fd:" << event.data.fd << " ev: " << revents << '\n';
+            revents |= EPOLLIN | EPOLLOUT;
+          }
+          if (revents & EPOLLIN) {
+            if (event_.events_[n].data.fd == listen_fd_) {
+              int conn_sock = handleAccept();
+              event_.add(conn_sock, EPOLLIN | EPOLLET);
+            } 
+            else {
+              Connection c(event_.events_[n].data.fd);
+              c.handleConnection();
+            }
+          }
+          else if (revents & EPOLLOUT) {
+            ;
           }
         }
       }

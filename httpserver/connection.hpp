@@ -17,7 +17,7 @@ namespace httpserver {
 
 class Connection {
 public:
-  Connection(int fd) : fd_(fd), buffer_(MAXLEN) {}
+  Connection(int fd) : fd_(fd) {}
   Connection(const Connection&) = delete;
   Connection& operator=(Connection&) = delete;
   ~Connection() {
@@ -27,9 +27,10 @@ public:
   
   bool handleConnection() {
     size_t size = MAXLEN;
-    int len = Read(buffer_.getBuffer(), size);
-    buffer_.syncRequest(len);
-    if (checkComplete()) {
+    char buffer[MAXLEN] = {0};
+    int len = Read(buffer, size);
+    buffer_.assignBuffer(buffer, len);
+    if (checkComplete(buffer_.getBuffer())) {
       std::string response = handleResponse();
       handleWrite(response);
     }
@@ -43,6 +44,7 @@ public:
     ssize_t n = 0;
     do {
       n = recv(fd_, buffer, size, 0);
+      std::cout << "recv: fd:" << fd_ << ' ' << n << " of" << ' ' << size << '\n'; 
 
       if (n == 0) {
         return 0;
@@ -59,13 +61,13 @@ public:
     return n;
   }
 
-  bool checkComplete() {
-    if (!buffer_.isComplete()) {
+  bool checkComplete(std::string header) {
+    if (!isComplete(header)) {
       size_t expandsize = MMAXLEN;
-      buffer_.expandBuffer(expandsize);
-      int size = Read(buffer_.getBuffer(), expandsize);
-      buffer_.syncRequest(size);
-      if (!buffer_.isComplete()) {
+      char buffer[MMAXLEN] = {0};
+      int size = Read(buffer, expandsize);
+      buffer_.assignBuffer(buffer, size);
+      if (!isComplete(buffer_.getBuffer())) {
         std::runtime_error("http头读取不完整");
         return false;
       }
@@ -83,7 +85,7 @@ public:
 
   std::string handleResponse() {
     std::string response;
-    ParseUri parseuri(buffer_.getRequest());
+    ParseUri parseuri(buffer_.getBuffer());
     std::string rootdir("/var/www/html");
     Response re(rootdir, parseuri.getRequestUri());
     response = re.getResponse();
@@ -91,6 +93,15 @@ public:
   }
 
 private:
+
+  bool isComplete(std::string header) {
+    auto n = header.find("\r\n\r\n");
+    if (n == std::string::npos) {
+      return false;
+    }
+    return true;
+  }
+
   int fd_{-1};
   Buffer buffer_;
 };
