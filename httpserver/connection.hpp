@@ -1,8 +1,7 @@
 #ifndef HTTP_SREVER_CONNECTION_HPP_
 #define HTTP_SREVER_CONNECTION_HPP_
 
-#include "response.hpp"
-#include "parse_uri.hpp"
+#include "request.hpp"
 #include "buffer.hpp"
 #include <string.h>
 #include <unistd.h>
@@ -10,7 +9,7 @@
 #include <sys/socket.h>
 #include <string>
 
-#define MAXLEN 1024
+#define MAXLEN 4096
 #define MMAXLEN 8192
 
 namespace httpserver {
@@ -26,12 +25,17 @@ public:
   }
   
   bool handleConnection() {
-    size_t size = MAXLEN;
+    size_t len = MAXLEN;
     char buffer[MAXLEN] = {0};
-    int len = Read(buffer, size);
-    buffer_.assignBuffer(buffer, len);
+    int size = Read(buffer, len);
+    if (-1 == size) {
+      std::cout << "errno: " << errno << ", " << strerror(errno) << '\n';
+      return false;
+    }
+    buffer_.assignBuffer(buffer, size);
     if (checkComplete(buffer_.getBuffer())) {
-      std::string response = handleResponse();
+      Request req(buffer_.getBuffer());
+      std::string response = req.handleRequest();
       handleWrite(response);
     }
     else {
@@ -39,36 +43,19 @@ public:
     }
     return true;
   }
-  
-  int Read(char* buffer, size_t size) {
-    ssize_t n = 0;
-    do {
-      n = recv(fd_, buffer, size, 0);
-      std::cout << "recv: fd:" << fd_ << ' ' << n << " of" << ' ' << size << '\n'; 
-
-      if (n == 0) {
-        return 0;
-      }
-
-      if (n > 0) {
-        if ((size_t) n < size) {
-          buffer_.setReady();
-          return n;
-        }
-      }
-    } while (errno == EINTR);
-
-    return n;
-  }
-
-  bool checkComplete(std::string header) {
+ 
+  bool checkComplete(const std::string header) {
     if (!isComplete(header)) {
       size_t expandsize = MMAXLEN;
       char buffer[MMAXLEN] = {0};
       int size = Read(buffer, expandsize);
+      if (-1 == size) {
+        std::cout << "errno: " << errno << ", " << strerror(errno) << '\n';
+        return false;
+      }
       buffer_.assignBuffer(buffer, size);
       if (!isComplete(buffer_.getBuffer())) {
-        std::runtime_error("http头读取不完整");
+        throw std::runtime_error("http头读取不完整");
         return false;
       }
     }
@@ -83,15 +70,6 @@ public:
     return wlen;
   }
 
-  std::string handleResponse() {
-    std::string response;
-    ParseUri parseuri(buffer_.getBuffer());
-    std::string rootdir("/var/www/html");
-    Response re(rootdir, parseuri.getRequestUri());
-    response = re.getResponse();
-    return response; 
-  }
-
 private:
 
   bool isComplete(std::string header) {
@@ -100,6 +78,26 @@ private:
       return false;
     }
     return true;
+  }
+ 
+  int Read(char* buffer, size_t size) {
+    ssize_t n = 0;
+    do {
+      n = recv(fd_, buffer, size, 0);
+      std::cout << "recv: fd:" << fd_ << ' ' << n << " of" << ' ' << size << '\n'; 
+
+      if (n == 0) {
+        return 0;
+      }
+
+      if (n > 0) {
+        if ((size_t) n < size) {
+          return n;
+        }
+      }
+    } while (errno != EINTR);
+    
+    return n;
   }
 
   int fd_{-1};

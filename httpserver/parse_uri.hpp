@@ -13,6 +13,7 @@ namespace httpserver {
 
 class ParseUri {
 public:
+  ParseUri() {}
   explicit ParseUri(std::string request) : method_("GET"), requesturi_("/index.html"), version_("HTTP/1.1") {
     auto n = request.find("\r\n");
     std::string requestline = request.substr(0, n);

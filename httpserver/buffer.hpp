@@ -18,8 +18,10 @@ public:
   Buffer& operator=(Buffer&) = delete;
 
   std::string assignBuffer(char* buffer, int size) {
-    std::string s(buffer, size);
-    request_ += s;
+    if (size > 0) {
+      std::string s(buffer, size);
+      request_ += s;
+    }
     return request_;
   }
 

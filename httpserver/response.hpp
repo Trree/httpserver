@@ -12,37 +12,46 @@ namespace httpserver {
 
 class Response{
 public:
-  Response(std::string requesturi, std::string rootdir) {
-    std::string filepath = requesturi.append(rootdir);
-    std::ifstream t(filepath);
-    std::string str((std::istreambuf_iterator<char>(t)),
-                    std::istreambuf_iterator<char>());
-    body_ = str;
+  Response() {}
+  std::string handleResponse(std::string path, std::string rootdir) {
+    body_ = getBody(path, rootdir);
    
     response_.clear();
     response_.append("HTTP/1.1 200 OK\r\n");
-
-    std::map<std::string, std::string> re;
-    re.insert(std::pair<std::string, std::string>("Content-Length", std::to_string(body_.size())));
-    re.insert(std::pair<std::string, std::string>("Content-Type", "text/html"));
-    for (auto value : re) {
-      response_.append(value.first);
-      response_.append(": ");
-      response_.append(value.second);
-      response_.append("\r\n");
-    }
-    response_.append("\r\n");
+    re_.insert(std::pair<std::string, std::string>
+        ("Content-Length", std::to_string(body_.size())));
+    re_.insert(std::pair<std::string, std::string>
+        ("Content-Type", "text/html"));
+    response_ += to_string(re_);
+    return response_.append(body_);
   }
 
   Response(const Response&) = delete;
   Response& operator=(Response&) = delete;
 
-  const std::string getResponse() {
-    return response_.append(body_);
+private:
+  std::string to_string(std::map<std::string, std::string> header){
+    std::string response;
+     for (auto value : header) {
+      response.append(value.first);
+      response.append(": ");
+      response.append(value.second);
+      response.append("\r\n");
+    }
+    response.append("\r\n");
+    return response;
   }
 
-private:
+  std::string getBody(std::string path, std::string rootdir) {
+    std::string filepath = path.append(rootdir);
+    std::ifstream t(filepath);
+    std::string str((std::istreambuf_iterator<char>(t)),
+                    std::istreambuf_iterator<char>());
+    return str;  
+  }
+
   std::string response_;
+  std::map<std::string, std::string> re_;
   std::string body_;
 };
 
