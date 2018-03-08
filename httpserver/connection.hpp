@@ -79,7 +79,7 @@ public:
           return n;
         }
       }
-    } while (errno != EINTR);
+    } while (errno == EINTR);
     
     return n;
   }
