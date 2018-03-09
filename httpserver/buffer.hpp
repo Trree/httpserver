@@ -25,11 +25,11 @@ public:
     return request_;
   }
 
-  std::string getBuffer(){
+  const std::string getBuffer() const {
     return request_;
   }
 
-  size_t size() {
+  size_t size() const{
     return request_.size();
   }
 
@@ -38,7 +38,7 @@ public:
   }
 
   void setReady() {
-    ready_ = 1;
+    ready_ = true;
   }
 
   ~Buffer() {}

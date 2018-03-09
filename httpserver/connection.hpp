@@ -24,7 +24,7 @@ public:
   }
   
   bool handleConnection() {
-    if (handleRead()) {
+    if (handleRead() && buffer_.isReady()) {
       Request req(buffer_.getBuffer());
       std::string response = req.handleRequest();
       int wlen = handleWrite(response);
@@ -78,6 +78,7 @@ public:
       }
 
       if (n == -1 && errno == EAGAIN) {
+        buffer_.setReady();
         break;
       }
     } 
