@@ -22,21 +22,21 @@ public:
     close(fd_);
     fd_ = -1;
   }
-  
-  bool handleConnection() {
+
+  void start() {
     if (handleRead() && buffer_.isReady()) {
       Request req(buffer_.getBuffer());
       std::string response = req.handleRequest();
       int wlen = handleWrite(response);
-      if (-1 == wlen) {
-        std::cout << "send errno: " << errno << ", " << strerror(errno) << '\n';
-        return false;
-      }
     }
     else {
-      return false;
+      stop();
     }
-    return true;
+  }
+
+  void stop() {
+    close(fd_);
+    fd_ = -1;
   }
 
   int handleWrite(std::string response) {
@@ -55,7 +55,7 @@ public:
     if (size == 0) {
       //if recv return 0, close connection.
       std::cout << "read return 0, so close connecion." << '\n';
-      return false;
+      stop();
     }
     if (!isComplete(buffer_.getBuffer())) {
       return false;
@@ -85,7 +85,7 @@ public:
 
     auto len = buffer_.size();
     return (len !=  0) ? len : n; 
-  }
+  } 
 
 private:
   bool isComplete(std::string header) {

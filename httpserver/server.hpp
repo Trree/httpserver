@@ -55,7 +55,7 @@ public:
             } 
             else {
               Connection c(event_.events_[n].data.fd);
-              c.handleConnection();
+              c.start();
             }
           }
           else if (revents & EPOLLOUT) {
