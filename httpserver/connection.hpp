@@ -10,7 +10,6 @@
 #include <string>
 
 #define MAXLEN 4096
-#define MMAXLEN 8192
 
 namespace httpserver {
 
@@ -41,10 +40,10 @@ public:
   }
 
   int handleWrite(std::string response) {
-    size_t wlen = 0;
-    int left = response.size();
-    wlen = send(fd_, response.c_str(), left, 0);
-    std::cout << "send: fd:" << fd_ << ' ' << wlen << " of" << ' ' << left << '\n'; 
+    ssize_t wlen = 0;
+    int size = response.size();
+    wlen = send(fd_, response.c_str(), size, 0);
+    std::cout << "send: fd:" << fd_ << ' ' << wlen << " of" << ' ' << size << '\n'; 
 
     return wlen;
   }
@@ -53,12 +52,12 @@ public:
     size_t len = MAXLEN;
     char buffer[MAXLEN] = {0};
     int size = Read(buffer, len);
-    if (-1 == size) {
-      std::cout << "recv errno: " << errno << ", " << strerror(errno) << '\n';
+    if (size == 0) {
+      //if recv return 0, close connection.
+      std::cout << "read return 0, so close connecion." << '\n';
       return false;
     }
-    buffer_.assignBuffer(buffer, size);
-    if (!checkComplete(buffer_.getBuffer())) {
+    if (!isComplete(buffer_.getBuffer())) {
       return false;
     }
     return true;
@@ -66,22 +65,25 @@ public:
 
   int Read(char* buffer, size_t size) {
     ssize_t n = 0;
-    do {
+    for(;;) {
       n = recv(fd_, buffer, size, 0);
-      std::cout << "recv: fd:" << fd_ << ' ' << n << " of" << ' ' << size << '\n'; 
 
       if (n == 0) {
         return 0;
       }
 
       if (n > 0) {
-        if ((size_t) n < size) {
-          return n;
-        }
+        buffer_.assignBuffer(buffer, size);
+        std::cout << "recv: fd:" << fd_ << ' ' << n << " of" << ' ' << size << '\n'; 
       }
-    } while (errno == EINTR);
-    
-    return n;
+
+      if (n == -1 && errno == EAGAIN) {
+        break;
+      }
+    } 
+
+    auto len = buffer_.size();
+    return (len !=  0) ? len : n; 
   }
 
 private:
@@ -89,24 +91,6 @@ private:
     auto n = header.find("\r\n\r\n");
     if (n == std::string::npos) {
       return false;
-    }
-    return true;
-  }
-
-  bool checkComplete(const std::string header) {
-    if (!isComplete(header)) {
-      size_t expandsize = MMAXLEN;
-      char buffer[MMAXLEN] = {0};
-      int size = Read(buffer, expandsize);
-      if (-1 == size) {
-        std::cout << "errno: " << errno << ", " << strerror(errno) << '\n';
-        return false;
-      }
-      buffer_.assignBuffer(buffer, size);
-      if (!isComplete(buffer_.getBuffer())) {
-        throw std::runtime_error("http头读取不完整");
-        return false;
-      }
     }
     return true;
   }

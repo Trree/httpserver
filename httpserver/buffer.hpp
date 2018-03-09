@@ -29,6 +29,10 @@ public:
     return request_;
   }
 
+  size_t size() {
+    return request_.size();
+  }
+
   bool isReady() const {
     return ready_;
   }
@@ -41,7 +45,7 @@ public:
 
 private:
   std::string request_;
-  bool ready_ = false;
+  bool ready_{false};
 };
 
 } // namespace httpserver
