@@ -20,8 +20,8 @@ public:
   ~ConnectionManager(){
     std::cout << "destruction ConnectionManager." << '\n';
   }
-  void start(connection_ptr c) {
-    connections_.insert(c);
+  void start(int fd) {
+    connections_.insert(std::make_shared<Connection>(fd, *this));
   }
 
   void stop(connection_ptr c) {

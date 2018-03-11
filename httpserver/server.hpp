@@ -56,11 +56,10 @@ public:
           if (revents & EPOLLIN) {
             if (event.data.fd  == listen_fd_) {
               int fd = handleAccept(listen_fd_);
-              auto connection = std::make_shared<Connection>(fd, connections_manager_);
-              connections_manager_.start(connection);
+              connections_manager_.start(fd);
               struct epoll_event ev;
               ev.events = EPOLLIN | EPOLLET;
-              ev.data.ptr = static_cast<void*>(connection.get());
+              //ev.data.ptr = static_cast<void*>(connection.get());
               if (epoll_ctl(event_.getEpollFd(), EPOLL_CTL_ADD, fd, &ev) == -1) {
                 std::cout << "epoll_ctl failed. fd is " << fd << '\n';
                 perror("epoll_ctl: fd_");
@@ -68,8 +67,8 @@ public:
               }
               continue;
             }
-            auto conn = std::shared_ptr<httpserver::Connection>(((Connection *)(event.data.ptr)));
-            conn->start();
+            //auto conn = std::shared_ptr<httpserver::Connection>(((Connection *)(event.data.ptr)));
+            //conn->start();
           }
           else if (revents & EPOLLOUT) {
             std::cout << "epoll_wait epollout: handle" << '\n' ;
