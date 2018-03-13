@@ -42,8 +42,22 @@ public:
   int handleWrite(std::string response) {
     ssize_t wlen = 0;
     int size = response.size();
-    wlen = send(fd_, response.c_str(), size, 0);
-    std::cout << "send: fd:" << fd_ << ' ' << wlen << " of" << ' ' << size << '\n'; 
+    const char *buffer = response.c_str();
+    for (;;) {
+      wlen = send(fd_, buffer, size, 0);
+      if (wlen == 0) {
+        break;
+      }
+
+      if (wlen == -1 && errno == EAGAIN) {
+        std::cout << "send: fd:" << fd_ << ' ' << wlen << " of" << ' ' << size << '\n'; 
+        std::cout << "send: wlen: " << wlen << " errno: " <<  errno << " " << strerror(errno) << '\n';
+        break;
+      }
+      std::cout << "send: fd:" << fd_ << ' ' << wlen << " of" << ' ' << size << '\n'; 
+      buffer += wlen;
+      size -= wlen;
+    }
 
     return wlen;
   }

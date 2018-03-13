@@ -59,7 +59,7 @@ public:
             }
           }
           else if (revents & EPOLLOUT) {
-            ;
+            std::cout << "epoll_wait epollout: handle" << '\n' ;
           }
         }
       }

@@ -7,12 +7,19 @@ namespace httpserver {
 
 class File {
   File(int fd) : fd_(fd) {}
+  File(const char* filename) : filehandle_(std::fopen(filename, "r")) {
+    if (filehandle_ == NULL) {
+      ;
+    }
+  }
+  ~File() {
+    std::fclose(filehandle_);
+  }
   File(const File&) = delete;
   File& operator=(File&) = delete;
-  File(File&& other) : fd_(std::move(other.fd_)) {}
 
 private:
-  int fd_{-1};
+  std::FILE* filehandle_;
 };
 
 } // namespace httpserver
