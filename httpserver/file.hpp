@@ -1,25 +1,30 @@
 #ifndef HTTP_SREVER_FILE_HPP_
 #define HTTP_SREVER_FILE_HPP_
 
+#include "exception_base.hpp"
 #include <iostream>
 
 namespace httpserver {
 
 class File {
   File(int fd) : fd_(fd) {}
-  File(const char* filename) : filehandle_(std::fopen(filename, "r")) {
-    if (filehandle_ == NULL) {
-      ;
+  File(const char* filename) : filehandle_(open(filename, "r")) {
+    if (filehandle_ == -1) {
+      throw FileOpenErr("fopen failed");
     }
   }
   ~File() {
-    std::fclose(filehandle_);
+    close(filehandle_);
+  }
+
+  int getFd() {
+    return filehandle_;
   }
   File(const File&) = delete;
   File& operator=(File&) = delete;
 
 private:
-  std::FILE* filehandle_;
+  int filehandle_;
 };
 
 } // namespace httpserver

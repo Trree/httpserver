@@ -13,10 +13,11 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <netdb.h>
+#include <netdb.h> 
+#include <memory>
 
 namespace httpserver {
-
+ 
 class HttpServer {
 public:
   explicit HttpServer(const std::string& ip = "0.0.0.0", 
@@ -32,6 +33,30 @@ public:
   }
   HttpServer(const HttpServer&) = delete;
   HttpServer& operator=(HttpServer&) = delete;
+
+  int handleAccept(int listen_fd) {
+    struct sockaddr_in client;
+    socklen_t addrlen = sizeof(client);
+    int conn_sock = accept(listen_fd, (struct sockaddr *) &client, &addrlen);
+    if (conn_sock == -1) {
+      throw std::system_error(errno, std::system_category(), "accept failed");
+    }
+
+    char clntName[INET6_ADDRSTRLEN];
+    char portName[6];
+    if(getnameinfo((const sockaddr*)&client, sizeof(client),
+                   clntName, sizeof(clntName),
+                   portName, sizeof(portName),
+                   NI_NUMERICHOST|NI_NUMERICSERV)==0){
+      std::cout << "client addr: " << clntName << ':' << portName << '\n';
+    } else {
+      std::cout << "Unable to get address" << '\n';
+    }
+    std::cout << "the connect fd is: " << conn_sock << '\n';
+
+    setNonBlocking(conn_sock);
+    return conn_sock;
+  }
 
   void handleEvent() {
     for (;;) {
@@ -49,13 +74,20 @@ public:
             revents |= EPOLLIN | EPOLLOUT;
           }
           if (revents & EPOLLIN) {
-            if (event_.events_[n].data.fd == listen_fd_) {
-              int conn_sock = handleAccept();
-              event_.add(conn_sock, EPOLLIN | EPOLLET);
-            } 
+            if (event.data.ptr) {
+              conn_ = std::make_shared((static_cast<Connection*>(event.data.ptr)));
+              conn_->start();
+            }
             else {
-              Connection c(event_.events_[n].data.fd);
-              c.start();
+              int fd = handleAccept(listen_fd_);
+              conn_.reset(new Connection(fd));
+              struct epoll_event ev;
+              ev.events = EPOLLIN | EPOLLET;
+              ev.data.ptr = &conn_;
+              if (epoll_ctl(event_.getEpollFd(), EPOLL_CTL_ADD, conn_->getFd(), &ev) == -1) {
+                perror("epoll_ctl: fd_");
+                exit(EXIT_FAILURE);
+              }
             }
           }
           else if (revents & EPOLLOUT) {
@@ -94,31 +126,7 @@ private:
       throw std::system_error(errno, std::system_category(), "listen failed");
     }
   }
-  
-  int handleAccept() {
-    struct sockaddr_in client;
-    socklen_t addrlen = sizeof(client);
-    int conn_sock = accept(listen_fd_, (struct sockaddr *) &client, &addrlen);
-    if (conn_sock == -1) {
-      throw std::system_error(errno, std::system_category(), "accept failed");
-    }
-
-    char clntName[INET6_ADDRSTRLEN];
-    char portName[6];
-    if(getnameinfo((const sockaddr*)&client, sizeof(client),
-                   clntName, sizeof(clntName),
-                   portName, sizeof(portName),
-                   NI_NUMERICHOST|NI_NUMERICSERV)==0){
-      std::cout << "client addr: " << clntName << ':' << portName << '\n';
-    } else {
-      std::cout << "Unable to get address" << '\n';
-    }
-    std::cout << "the connect fd is: " << conn_sock << '\n';
-
-    setNonBlocking(conn_sock);
-    return conn_sock;
-  }
-
+ 
   void setNonBlocking(int sock){
     int opts;
     if ((opts = fcntl(sock, F_GETFL)) < 0) {
@@ -137,7 +145,7 @@ private:
   std::string rootdir_;
   int listen_fd_ = -1;
   Event event_;
-
+  std::shared_ptr<Connection> conn_;
 };
 
 } //namespace httpserver

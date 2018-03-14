@@ -8,13 +8,15 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <string>
+#include <memory>
 
 #define MAXLEN 4096
 
 namespace httpserver {
 
-class Connection {
+class Connection : public std::enable_shared_from_this<Connection> {
 public:
+  Connection() : fd_(-1) {}
   Connection(int fd) : fd_(fd) {}
   Connection(const Connection&) = delete;
   Connection& operator=(Connection&) = delete;
@@ -27,7 +29,7 @@ public:
     if (handleRead() && buffer_.isReady()) {
       Request req(buffer_.getBuffer());
       std::string response = req.handleRequest();
-      int wlen = handleWrite(response);
+      handleWrite(response);
     }
     else {
       stop();
@@ -39,11 +41,22 @@ public:
     fd_ = -1;
   }
 
+  int getFd() {
+    return fd_;
+  }
+  void setFd(int fd) {
+    fd_ = fd;
+  }
+
   int handleWrite(std::string response) {
+    std::cout << "Start write ..." << '\n';
     ssize_t wlen = 0;
     int size = response.size();
     const char *buffer = response.c_str();
     for (;;) {
+      if (size <= 0) {
+        break;
+      }
       wlen = send(fd_, buffer, size, 0);
       if (wlen == 0) {
         break;
@@ -78,6 +91,7 @@ public:
   }
 
   int Read(char* buffer, size_t size) {
+    std::cout << "Start read ..." << '\n';
     ssize_t n = 0;
     for(;;) {
       n = recv(fd_, buffer, size, 0);
