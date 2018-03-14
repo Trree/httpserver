@@ -56,8 +56,7 @@ public:
           if (revents & EPOLLIN) {
             if (event.data.fd  == listen_fd_) {
                int fd = handleAccept(listen_fd_);
-              conn_.reset(new Connection(fd));
-              connections_manager_.start(conn_);
+              conn_.reset(new Connection(fd, connections_manager_));
               struct epoll_event ev;
               ev.events = EPOLLIN | EPOLLET;
               ev.data.ptr = static_cast<void*>(conn_.get());

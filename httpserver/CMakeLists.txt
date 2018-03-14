@@ -19,7 +19,7 @@ option(Indefinite_ENABLE_TESTING "Enable testing of the library." ON)
 ADD_DEFINITIONS(-std=c++11 -g3 -W -Wall -pedantic -D_GNU_SOURCE)
 
 # add the executable
-add_executable(${PROJECT_NAME} main.cpp)
+add_executable(${PROJECT_NAME} connection.cpp main.cpp)
 
 if (Indefinite_ENABLE_TESTING)
   enable_testing()

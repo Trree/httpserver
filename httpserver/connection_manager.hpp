@@ -2,6 +2,7 @@
 #define HTTP_SREVER_CONNECTION_MANAGER_HPP_
 
 #include "connection.hpp"
+#include <memory>
 #include <set>
 
 namespace httpserver {
@@ -23,6 +24,7 @@ public:
 
   void stop(connection_ptr c) {
     connections_.erase(c);
+    c->stop();
   }
 
   void stop_all() {
