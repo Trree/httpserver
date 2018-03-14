@@ -20,6 +20,16 @@ public:
   Connection(int fd) : fd_(fd) {}
   Connection(const Connection&) = delete;
   Connection& operator=(Connection&) = delete;
+  Connection(Connection&& c) : fd_(c.fd_), buffer_(std::move(c.buffer_)) {
+    c.fd_  = -1;
+  }
+  Connection& operator=(Connection&& c) {
+    using std::swap;
+    swap(fd_, c.fd_);
+    swap(buffer_, c.buffer_);
+    return *this;
+  }
+
   ~Connection() {
     close(fd_);
     fd_ = -1;
@@ -54,18 +64,17 @@ public:
     int size = response.size();
     const char *buffer = response.c_str();
     for (;;) {
-      if (size <= 0) {
-        break;
-      }
       wlen = send(fd_, buffer, size, 0);
       if (wlen == 0) {
-        break;
+        return 0;
       }
 
-      if (wlen == -1 && errno == EAGAIN) {
-        std::cout << "send: fd:" << fd_ << ' ' << wlen << " of" << ' ' << size << '\n'; 
+      if (wlen == -1) {
+        if (errno == EAGAIN) {
+          break;
+        }
         std::cout << "send: wlen: " << wlen << " errno: " <<  errno << " " << strerror(errno) << '\n';
-        break;
+        return -1;
       }
       std::cout << "send: fd:" << fd_ << ' ' << wlen << " of" << ' ' << size << '\n'; 
       buffer += wlen;
@@ -78,10 +87,8 @@ public:
   bool handleRead() {
     size_t len = MAXLEN;
     char buffer[MAXLEN] = {0};
-    int size = Read(buffer, len);
-    if (size == 0) {
-      //if recv return 0, close connection.
-      std::cout << "read return 0, so close connecion." << '\n';
+    int rlen = Read(buffer, len);
+    if (rlen <= 0) {
       stop();
     }
     if (!isComplete(buffer_.getBuffer())) {
@@ -106,8 +113,11 @@ public:
       }
 
       if (n == -1 && errno == EAGAIN) {
-        buffer_.setReady();
-        break;
+        if (errno == EAGAIN) {
+          buffer_.setReady();
+          break;
+        }
+        return -1;
       }
     } 
 
