@@ -24,7 +24,6 @@ public:
 
   void stop(connection_ptr c) {
     connections_.erase(c);
-    c->stop();
   }
 
   void stop_all() {

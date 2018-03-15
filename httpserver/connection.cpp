@@ -6,7 +6,6 @@
 namespace httpserver {
 
 void Connection::start() {
-  connections_manager_.start(shared_from_this());
   if (handleRead() && buffer_.isReady()) {
     Request req(buffer_.getBuffer());
     std::string response = req.handleRequest();
@@ -21,7 +20,6 @@ void Connection::stop()
 {
   close(fd_);
   fd_ = -1;
-  connections_manager_.stop(shared_from_this());
 }
 
 int Connection::getFd() 

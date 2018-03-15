@@ -55,19 +55,21 @@ public:
           
           if (revents & EPOLLIN) {
             if (event.data.fd  == listen_fd_) {
-               int fd = handleAccept(listen_fd_);
-              conn_.reset(new Connection(fd, connections_manager_));
+              int fd = handleAccept(listen_fd_);
+              auto connection = std::make_shared<Connection>(fd, connections_manager_);
+              connections_manager_.start(connection);
               struct epoll_event ev;
               ev.events = EPOLLIN | EPOLLET;
-              ev.data.ptr = static_cast<void*>(conn_.get());
-              if (epoll_ctl(event_.getEpollFd(), EPOLL_CTL_ADD, conn_->getFd(), &ev) == -1) {
+              ev.data.ptr = static_cast<void*>(connection.get());
+              if (epoll_ctl(event_.getEpollFd(), EPOLL_CTL_ADD, fd, &ev) == -1) {
+                std::cout << "epoll_ctl failed. fd is " << fd << '\n';
                 perror("epoll_ctl: fd_");
                 exit(EXIT_FAILURE);
               }
               continue;
             }
-            conn_ = std::shared_ptr<httpserver::Connection>(((Connection *)(event.data.ptr)));
-            conn_->start();
+            auto conn = std::shared_ptr<httpserver::Connection>(((Connection *)(event.data.ptr)));
+            conn->start();
           }
           else if (revents & EPOLLOUT) {
             std::cout << "epoll_wait epollout: handle" << '\n' ;
@@ -149,7 +151,6 @@ private:
   int listen_fd_ = -1;
   Event event_;
   ConnectionManager connections_manager_;
-  connection_ptr conn_;
 };
 
 } //namespace httpserver

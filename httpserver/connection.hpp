@@ -21,18 +21,8 @@ public:
   explicit Connection(int fd, ConnectionManager& cm) : fd_(fd), connections_manager_(cm) {}
   Connection(const Connection&) = delete;
   Connection& operator=(Connection&) = delete;
-/*
-  Connection(Connection&& c) : fd_(c.fd_), buffer_(std::move(c.buffer_)) {
-    c.fd_  = -1;
-  }
-  Connection& operator=(Connection&& c) {
-    using std::swap;
-    swap(fd_, c.fd_);
-    swap(buffer_, c.buffer_);
-    return *this;
-  }
-*/
   ~Connection() {
+    std::cout << "destruction connection" << '\n';
     close(fd_);
     fd_ = -1;
   }
