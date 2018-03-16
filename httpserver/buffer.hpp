@@ -44,8 +44,6 @@ public:
     ready_ = true;
   }
 
-  ~Buffer() {}
-
 private:
   std::string request_;
   bool ready_{false};

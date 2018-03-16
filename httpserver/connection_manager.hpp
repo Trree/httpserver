@@ -17,7 +17,9 @@ public:
   ConnectionManager(connection_ptr c) {
     connections_.insert(c);
   }
-  ~ConnectionManager(){}
+  ~ConnectionManager(){
+    std::cout << "destruction ConnectionManager." << '\n';
+  }
   void start(connection_ptr c) {
     connections_.insert(c);
   }
