@@ -8,17 +8,16 @@ namespace httpserver {
 
 class Buffer {
 public:
+  Buffer(const Buffer&) = delete;
+  Buffer(Buffer&&) = default;
+  Buffer& operator=(Buffer&) = delete;
+  Buffer& operator=(const Buffer&&) = default;
+
   Buffer() {}
 
   Buffer(char* buffer, int size) {
     request_.assign(buffer, size);
   }
-
-  Buffer(const Buffer&) = delete;
-  Buffer(Buffer&&) = default;
-  Buffer& operator=(Buffer&) = delete;
-  Buffer& operator=(Buffer&&) = default;
-  
 
   std::string assignBuffer(char* buffer, int size) {
     if (size > 0) {

@@ -18,9 +18,10 @@ class ConnectionManager;
 
 class Connection : public std::enable_shared_from_this<Connection> {
 public:
-  explicit Connection(int fd, ConnectionManager& cm) : fd_(fd), connections_manager_(cm) {}
   Connection(const Connection&) = delete;
-  Connection& operator=(Connection&) = delete;
+  Connection& operator=(const Connection&) = delete;
+  
+  explicit Connection(int fd, ConnectionManager& cm) : fd_(fd), connections_manager_(cm) {}
   ~Connection() {
     std::cout << "destruction connection" << '\n';
     close(fd_);

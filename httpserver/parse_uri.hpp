@@ -13,15 +13,15 @@ namespace httpserver {
 
 class ParseUri {
 public:
+  ParseUri(const ParseUri&) = delete;
+  ParseUri& operator=(const ParseUri&) = delete;
+  
   ParseUri() {}
   explicit ParseUri(std::string request) : method_("GET"), requesturi_("/index.html"), version_("HTTP/1.1") {
     auto n = request.find("\r\n");
     std::string requestline = request.substr(0, n);
     handleRequestUri(requestline);
   }
-
-  ParseUri(const ParseUri&) = delete;
-  ParseUri& operator=(ParseUri&) = delete;
 
   const std::string getMethod() const {
     return method_;

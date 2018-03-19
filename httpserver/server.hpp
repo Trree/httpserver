@@ -16,6 +16,7 @@
 #include <fcntl.h>
 #include <netdb.h> 
 #include <memory>
+#include <map>
 
 namespace httpserver {
  
@@ -23,6 +24,9 @@ using connection_ptr = std::shared_ptr<Connection>;
 
 class HttpServer {
 public:
+  HttpServer(const HttpServer&) = delete;
+  HttpServer& operator=(const HttpServer&) = delete;
+  
   explicit HttpServer(const std::string& ip = "0.0.0.0", 
                       const std::string& port = "9999", 
                       const std::string rootdir = "/var/www/html/") 
@@ -34,8 +38,6 @@ public:
     close(listen_fd_);
     listen_fd_ = -1;
   }
-  HttpServer(const HttpServer&) = delete;
-  HttpServer& operator=(HttpServer&) = delete;
 
   void handleEvent() {
     for (;;) {
@@ -59,7 +61,9 @@ public:
               connections_manager_.start(fd);
               struct epoll_event ev;
               ev.events = EPOLLIN | EPOLLET;
-              //ev.data.ptr = static_cast<void*>(connection.get());
+              auto conn = std::make_shared<Connection>(fd, connections_manager_);
+              rconn_.insert(std::pair<int, connection_ptr>(fd, conn));
+              ev.data.ptr = static_cast<void*>(conn.get());
               if (epoll_ctl(event_.getEpollFd(), EPOLL_CTL_ADD, fd, &ev) == -1) {
                 std::cout << "epoll_ctl failed. fd is " << fd << '\n';
                 perror("epoll_ctl: fd_");
@@ -67,8 +71,8 @@ public:
               }
               continue;
             }
-            //auto conn = std::shared_ptr<httpserver::Connection>(((Connection *)(event.data.ptr)));
-            //conn->start();
+            auto conn = std::shared_ptr<httpserver::Connection>(((Connection *)(event.data.ptr)));
+            conn->start();
           }
           else if (revents & EPOLLOUT) {
             std::cout << "epoll_wait epollout: handle" << '\n' ;
@@ -150,6 +154,7 @@ private:
   int listen_fd_ = -1;
   Event event_;
   ConnectionManager connections_manager_;
+  std::map<int, connection_ptr> rconn_;
 };
 
 } //namespace httpserver

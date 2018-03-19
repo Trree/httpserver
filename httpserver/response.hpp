@@ -12,6 +12,9 @@ namespace httpserver {
 
 class Response{
 public:
+  Response(const Response&) = delete;
+  Response& operator=(const Response&) = delete;
+  
   Response() {}
   std::string handleResponse(std::string path, std::string rootdir) {
     body_ = getBody(path, rootdir);
@@ -25,9 +28,6 @@ public:
     response_ += to_string(re_);
     return response_.append(body_);
   }
-
-  Response(const Response&) = delete;
-  Response& operator=(Response&) = delete;
 
 private:
   std::string to_string(std::map<std::string, std::string> header){

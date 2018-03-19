@@ -21,7 +21,7 @@ class File {
     return filehandle_;
   }
   File(const File&) = delete;
-  File& operator=(File&) = delete;
+  File& operator=(const File&) = delete;
 
 private:
   int filehandle_;

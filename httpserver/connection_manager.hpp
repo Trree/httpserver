@@ -11,9 +11,10 @@ using connection_ptr = std::shared_ptr<Connection>;
 
 class ConnectionManager {
 public:
-  ConnectionManager() {}
   ConnectionManager(const ConnectionManager&) = delete;
-  ConnectionManager& operator=(ConnectionManager&) = delete;
+  ConnectionManager& operator=(const ConnectionManager&) = delete;
+  
+  ConnectionManager() {}
   ConnectionManager(connection_ptr c) {
     connections_.insert(c);
   }
@@ -31,7 +32,6 @@ public:
   void stop_all() {
     connections_.clear();
   }
-
 private:
   std::set<connection_ptr> connections_;
 };
