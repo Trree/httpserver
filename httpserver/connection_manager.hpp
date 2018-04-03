@@ -14,24 +14,28 @@ public:
   ConnectionManager(const ConnectionManager&) = delete;
   ConnectionManager& operator=(const ConnectionManager&) = delete;
   
-  ConnectionManager() {}
-  ConnectionManager(connection_ptr c) {
-    connections_.insert(c);
-  }
+  ConnectionManager() : max_(0) {}
   ~ConnectionManager(){}
-  void start(connection_ptr conn) {
-    connections_.insert(conn);
+  uint64_t start(int fd) {
+    max_++;
+    connections_.insert(std::pair<uint64_t, connection_ptr>(max_, std::make_shared<Connection>(fd, max_, *this)));
+    return max_;
   }
 
-  void stop(connection_ptr c) {
-    connections_.erase(c);
+  void stop(uint64_t num) {
+    connections_.erase(num);
+  }
+
+  connection_ptr getConnection(uint64_t num) {
+    return connections_.at(num);
   }
 
   void stop_all() {
     connections_.clear();
   }
 private:
-  std::set<connection_ptr> connections_;
+  uint64_t max_;
+  std::map<uint64_t, connection_ptr> connections_;
 };
 
 } // namespace httpserver

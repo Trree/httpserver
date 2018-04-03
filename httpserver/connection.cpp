@@ -12,16 +12,11 @@ void Connection::start() {
     handleWrite(response);
     stop();
   }
-  else {
-    stop();
-  }
 }
 
 void Connection::stop() 
 {
-  connections_manager_.stop(shared_from_this());
-  // can't throw exception, because it in the loop.
-  //throw std::logic_error("connection stop");
+  connections_manager_.stop(getKey());
 }
 
 int Connection::getFd() 
@@ -32,6 +27,11 @@ int Connection::getFd()
 void Connection::setFd(int fd) 
 {
   fd_ = fd;
+}
+
+int Connection::getKey()
+{
+  return key_;
 }
 
 int Connection::handleWrite(std::string response)
@@ -88,7 +88,7 @@ int Connection::Read(char* buffer, size_t size)
 
     if (n > 0) {
       buffer_.assignBuffer(buffer, size);
-      std::cout << "recv: fd:" << fd_ << ' ' << n << " of" << ' ' << size << '\n'; 
+      std::cout << "recv: fd:" << fd_ << ' ' << "flag: " << key_ << ' '<< n << " of" << ' ' << size << '\n'; 
     }
 
     if (n == -1 && errno == EAGAIN) {

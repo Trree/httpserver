@@ -41,31 +41,29 @@ public:
 
   void handleEvent() {
     for (;;) {
-      try {
-        int nfds = epoll_wait(event_.getEpollFd(), event_.events_, 100, -1);
-        if (nfds < 0) {
-          std::cout << "epoll_wait() error" << errno << strerror(errno) << '\n';
-          continue;
+      int nfds = epoll_wait(event_.getEpollFd(), event_.events_, 100, -1);
+      if (nfds < 0) {
+        std::cout << "epoll_wait() error" << errno << strerror(errno) << '\n';
+        continue;
+      }
+      for (int n = 0; n < nfds; ++n) {
+        auto event = event_.events_[n];
+        auto revents = event.events;
+        if (revents & (EPOLLERR | EPOLLHUP)) {
+          std::cout << "epoll_wait() error on fd:" << event.data.fd << " ev: " << revents << '\n';
+          revents |= EPOLLIN | EPOLLOUT;
         }
-        for (int n = 0; n < nfds; ++n) {
-          auto event = event_.events_[n];
-          auto revents = event.events;
-          if (revents & (EPOLLERR | EPOLLHUP)) {
-            std::cout << "epoll_wait() error on fd:" << event.data.fd << " ev: " << revents << '\n';
-            revents |= EPOLLIN | EPOLLOUT;
-          }
-          else if (revents & EPOLLRDHUP) {
-            std::cout << "EPOLLRDHUP" << '\n';
-          }
-          
+        else if (revents & EPOLLRDHUP) {
+          std::cout << "EPOLLRDHUP" << '\n';
+        }
+
+        try {
           if (revents & EPOLLIN) {
             if (event.data.fd  == listen_fd_) {
               int fd = handleAccept(listen_fd_);
-              auto connptr = std::make_shared<Connection>(fd, connections_manager_);
-              connections_manager_.start(connptr);
               struct epoll_event ev;
               ev.events = EPOLLIN | EPOLLET;
-              ev.data.ptr = static_cast<void*>(connptr.get());
+              ev.data.u64 = connections_manager_.start(fd);
               if (epoll_ctl(event_.getEpollFd(), EPOLL_CTL_ADD, fd, &ev) == -1) {
                 std::cout << "epoll_ctl failed. fd is " << fd << '\n';
                 perror("epoll_ctl: fd_");
@@ -75,16 +73,15 @@ public:
             }
             // connctions_manager_ manage the lifetime of connection.
             // when earse the connecion. The connection would distruction.
-            auto conn = static_cast<Connection *>(event.data.ptr);
+            auto conn = connections_manager_.getConnection(event.data.u64);
             conn->start();
           }
           else if (revents & EPOLLOUT) {
             std::cout << "epoll_wait epollout: handle" << '\n' ;
           }
+        } catch (const std::exception& e) {
+          std::cout << e.what() << '\n';
         }
-      }
-      catch (const std::exception& e) {
-        std::cout << e.what() << '\n';
       }
     }
   }

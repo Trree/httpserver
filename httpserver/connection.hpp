@@ -21,8 +21,9 @@ public:
   Connection(const Connection&) = delete;
   Connection& operator=(const Connection&) = delete;
   
-  explicit Connection(int fd, ConnectionManager& cm) 
+  explicit Connection(int fd, uint64_t key, ConnectionManager& cm) 
   : fd_(fd), 
+    key_(key),
     connections_manager_(cm) {}
   ~Connection() {
     std::cout << "destruction connection " << fd_ << '\n';
@@ -33,6 +34,7 @@ public:
   void start(); 
   void stop(); 
   int getFd();
+  int getKey();
   void setFd(int fd);
 
   int handleWrite(std::string response);
@@ -42,6 +44,7 @@ public:
 
 private:
   int fd_{-1};
+  uint64_t key_;
   Buffer buffer_;
   ConnectionManager &connections_manager_;
 };
