@@ -33,7 +33,7 @@ public:
                       const std::string rootdir = "/var/www/html/") 
   : ip_(ip), port_(port), rootdir_(rootdir), event_(){
     bindAndListen();
-    event_.add(listen_fd_, EPOLLIN);
+    event_.add(listen_fd_, 0, EPOLLIN);
   }
   ~HttpServer() {
     close(listen_fd_);
@@ -60,22 +60,17 @@ public:
 
         try {
           if (revents & EPOLLIN) {
-            if (event.data.fd  == listen_fd_) {
+            if (event.data.u64  == 0) {
               int fd = handleAccept(listen_fd_);
-              struct epoll_event ev;
-              ev.events = EPOLLIN | EPOLLET;
-              ev.data.u64 = connections_manager_.start(fd);
-              if (epoll_ctl(event_.getEpollFd(), EPOLL_CTL_ADD, fd, &ev) == -1) {
-                std::cout << "epoll_ctl failed. fd is " << fd << '\n';
-                perror("epoll_ctl: fd_");
-                exit(EXIT_FAILURE);
-              }
-              continue;
+              uint32_t num = connections_manager_.start(fd);
+              event_.add(fd, num, EPOLLIN|EPOLLET);
             }
-            // connctions_manager_ manage the lifetime of connection.
-            // when earse the connecion. The connection would distruction.
-            auto conn = connections_manager_.getConnection(event.data.u64);
-            conn->start();
+            else {
+              // connctions_manager_ manage the lifetime of connection.
+              // when earse the connecion. The connection would distruction.
+              auto conn = connections_manager_.getConnection(event.data.u64);
+              conn->start();
+            }
           }
           else if (revents & EPOLLOUT) {
             std::cout << "epoll_wait epollout: handle" << '\n' ;

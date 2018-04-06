@@ -18,6 +18,11 @@ public:
   ~ConnectionManager(){}
   uint64_t start(int fd) {
     max_++;
+    auto search = connections_.find(max_);
+    while (max_ == 0 || search != connections_.end()) {
+      max_++;
+      search = connections_.find(max_);
+    }
     connections_.insert(std::pair<uint64_t, connection_ptr>(max_, std::make_shared<Connection>(fd, max_, *this)));
     return max_;
   }

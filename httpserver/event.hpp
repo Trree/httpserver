@@ -22,10 +22,10 @@ public:
     }
   }
 
-  void add(int fd, uint32_t event) {
+  void add(int fd, uint32_t num, uint32_t event) {
     struct epoll_event ev;
     ev.events = event;
-    ev.data.fd = fd;
+    ev.data.u64 = num;
     if (epoll_ctl(epollfd_, EPOLL_CTL_ADD, fd, &ev) == -1) {
       perror("epoll_ctl: fd_");
       exit(EXIT_FAILURE);
