@@ -66,13 +66,13 @@ public:
               event_.add(fd, num, EPOLLIN|EPOLLET);
             }
             else {
-              // connctions_manager_ manage the lifetime of connection.
-              // when earse the connecion. The connection would distruction.
               auto conn = connections_manager_.getConnection(event.data.u64);
               conn->start();
             }
           }
           else if (revents & EPOLLOUT) {
+            auto conn = connections_manager_.getConnection(event.data.u64);
+            conn->start();
             std::cout << "epoll_wait epollout: handle" << '\n' ;
           }
         } catch (const std::exception& e) {

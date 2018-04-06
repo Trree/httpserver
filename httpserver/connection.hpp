@@ -9,6 +9,7 @@
 #include <sys/socket.h>
 #include <string>
 #include <memory>
+#include <chrono>
 
 #define MAXLEN 4096
 
@@ -24,6 +25,7 @@ public:
   explicit Connection(int fd, uint64_t key, ConnectionManager& cm) 
   : fd_(fd), 
     key_(key),
+    begin_time_(std::chrono::system_clock::now()),
     connections_manager_(cm) {}
   ~Connection() {
     std::cout << "destruction connection " << fd_ << '\n';
@@ -46,6 +48,7 @@ private:
   int fd_{-1};
   uint64_t key_;
   Buffer buffer_;
+  std::chrono::system_clock::time_point begin_time_;
   ConnectionManager &connections_manager_;
 };
 
