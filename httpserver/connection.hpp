@@ -25,7 +25,7 @@ public:
   explicit Connection(int fd, uint64_t key, ConnectionManager& cm) 
   : fd_(fd), 
     key_(key),
-    begin_time_(std::chrono::high_resolution_clock::now()),
+    end_time_(std::chrono::high_resolution_clock::now()),
     connections_manager_(cm) {}
   ~Connection() {
     std::cout << "destruction connection " << fd_ << '\n';
@@ -38,8 +38,8 @@ public:
   int getFd();
   void setFd(int fd);
   int getKey();
-  std::chrono::high_resolution_clock::time_point getBeginTime() const {
-    return begin_time_;
+  std::chrono::high_resolution_clock::time_point getExpiredTime() {
+    return end_time_ + std::chrono::seconds(3600);
   }
 
   int handleWrite(std::string response);
@@ -51,7 +51,7 @@ private:
   int fd_{-1};
   uint64_t key_;
   Buffer buffer_;
-  std::chrono::high_resolution_clock::time_point begin_time_;
+  std::chrono::high_resolution_clock::time_point end_time_;
   ConnectionManager &connections_manager_;
 };
 

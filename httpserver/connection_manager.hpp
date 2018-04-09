@@ -42,8 +42,8 @@ public:
 
   void regularClean() {
     for (auto it = connections_.cbegin(); it != connections_.cend(); ) {
-      if (i.seconds->getBeginTime() < std::chrono::high_resolution_clock::now()) {
-        connections_.erase(it++);
+      if (i.seconds->getExpiredTime()  < std::chrono::high_resolution_clock::now()) {
+        it = connections_.erase(it);
       }
       else {
         ++it;

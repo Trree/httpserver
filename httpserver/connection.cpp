@@ -58,6 +58,7 @@ int Connection::handleWrite(std::string response)
     size -= wlen;
   }
 
+  end_time_ = std::chrono::high_resolution_clock::now();
   return wlen;
 }
  
@@ -72,6 +73,7 @@ bool Connection::handleRead()
   if (!isComplete(buffer_.getBuffer())) {
     return false;
   }
+  end_time_ = std::chrono::high_resolution_clock::now();
   return true;
 }
 
