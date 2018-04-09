@@ -10,7 +10,7 @@
 
 namespace httpserver {
 
-using pair_t = std::pair<std::chrono::system_clock::time_point,std::function<void()>>;
+using pair_t = std::pair<std::chrono::high_resolution_clock::time_point,std::function<void()>>;
 using container_t = std::vector<pair_t>;
 auto comp = [](const pair_t& e1, const pair_t& e2)
             { return e1.first > e2.first; };
@@ -21,15 +21,15 @@ public:
   Timer& operator=(const Timer&) = delete;
 
   explicit Timer(std::chrono::seconds sec, std::function<void()> fun) : time_(comp) {
-    time_.push(std::make_pair(sec + std::chrono::system_clock::now(), fun));
+    time_.push(std::make_pair(sec + std::chrono::high_resolution_clock::now(), fun));
   }
   void insert(std::chrono::seconds sec, std::function<void()> fun) {
-    time_.push(std::make_pair(sec + std::chrono::system_clock::now(), fun));
+    time_.push(std::make_pair(sec + std::chrono::high_resolution_clock::now(), fun));
   }
   void run() {
     while(!time_.empty()) {
-      auto interval = std::chrono::system_clock::now() - time_.top().first;
-      if (interval.count() > 0) {
+      auto interval = time_.top().first - std::chrono::high_resolution_clock::now();
+      if (interval.count() < 0) {
         time_.top().second();
         time_.pop();
       }

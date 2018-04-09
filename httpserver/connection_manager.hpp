@@ -16,6 +16,7 @@ public:
   
   ConnectionManager() : max_(0) {}
   ~ConnectionManager(){}
+  
   uint64_t start(int fd) {
     max_++;
     auto search = connections_.find(max_);
@@ -38,6 +39,18 @@ public:
   void stop_all() {
     connections_.clear();
   }
+
+  void regularClean() {
+    for (auto it = connections_.cbegin(); it != connections_.cend(); ) {
+      if (i.seconds->getBeginTime() < std::chrono::high_resolution_clock::now()) {
+        connections_.erase(it++);
+      }
+      else {
+        ++it;
+      }
+    }
+  }
+
 private:
   uint64_t max_;
   std::map<uint64_t, connection_ptr> connections_;
