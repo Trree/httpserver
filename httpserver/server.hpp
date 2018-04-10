@@ -41,6 +41,9 @@ public:
   }
 
   void handleEvent() {
+
+    //auto timer = [&]() { connections_manager_.regularClean();};
+
     for (;;) {
       int nfds = epoll_wait(event_.getEpollFd(), event_.events_, 100, -1);
       if (nfds < 0) {
