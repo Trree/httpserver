@@ -21,10 +21,18 @@ class Connection : public std::enable_shared_from_this<Connection> {
 public:
   Connection(const Connection&) = delete;
   Connection& operator=(const Connection&) = delete;
-  
+ 
+  enum class StatusType {
+    closed,
+    established,
+    read,
+    write
+  } status; 
+ 
   explicit Connection(int fd, uint64_t key, ConnectionManager& cm) 
   : fd_(fd), 
     key_(key),
+    status_(StatusType::established),
     end_time_(std::chrono::high_resolution_clock::now()),
     connections_manager_(cm) {}
   ~Connection() {
@@ -39,7 +47,10 @@ public:
   void setFd(int fd);
   int getKey();
   std::chrono::high_resolution_clock::time_point getExpiredTime() {
-    return end_time_ + std::chrono::seconds(3600);
+    return end_time_ + std::chrono::seconds(15);
+  }
+  void setStatus(StatusType status) {
+    status_ = status;
   }
 
   int handleWrite(std::string response);
@@ -48,9 +59,11 @@ public:
   bool isComplete(std::string header);
 
 private:
+
   int fd_{-1};
   uint64_t key_;
   Buffer buffer_;
+  StatusType status_{StatusType::closed};
   std::chrono::high_resolution_clock::time_point end_time_;
   ConnectionManager &connections_manager_;
 };

@@ -10,7 +10,7 @@ void Connection::start() {
     Request req(buffer_.getBuffer());
     std::string response = req.handleRequest();
     handleWrite(response);
-    stop();
+    setStatus(StatusType::closed);
   }
 }
 
@@ -58,6 +58,7 @@ int Connection::handleWrite(std::string response)
     size -= wlen;
   }
 
+  setStatus(StatusType::write);
   end_time_ = std::chrono::high_resolution_clock::now();
   return wlen;
 }
@@ -73,6 +74,7 @@ bool Connection::handleRead()
   if (!isComplete(buffer_.getBuffer())) {
     return false;
   }
+  setStatus(StatusType::read);
   end_time_ = std::chrono::high_resolution_clock::now();
   return true;
 }
