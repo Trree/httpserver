@@ -41,14 +41,18 @@ public:
   }
 
   void handleEvent() {
-
-    //auto timer = [&]() { connections_manager_.regularClean();};
-
+    auto timer = [&]() { 
+      std::cout << "Start timer ..." << '\n';
+      connections_manager_.regularClean();
+    };
     for (;;) {
-      int nfds = epoll_wait(event_.getEpollFd(), event_.events_, 100, -1);
+      int nfds = epoll_wait(event_.getEpollFd(), event_.events_, 100, 5000);
       if (nfds < 0) {
         std::cout << "epoll_wait() error" << errno << strerror(errno) << '\n';
         continue;
+      }
+      if (nfds == 0) {
+        timer();
       }
       for (int n = 0; n < nfds; ++n) {
         auto event = event_.events_[n];
