@@ -70,6 +70,7 @@ bool Connection::handleRead()
   int rlen = Read(buffer, len);
   if (rlen <= 0) {
     stop();
+    return false;
   }
   if (!isComplete(buffer_.getBuffer())) {
     return false;
