@@ -28,7 +28,7 @@ public:
   HttpServer(const HttpServer&) = delete;
   HttpServer& operator=(const HttpServer&) = delete;
   
-  explicit HttpServer(const std::string& ip = "0.0.0.0", 
+  explicit HttpServer(const std::string& ip = "::", 
                       const std::string& port = "9999", 
                       const std::string rootdir = "/var/www/html/") 
   : ip_(ip), port_(port), rootdir_(rootdir), event_(){
@@ -94,23 +94,57 @@ private:
   void bindAndListen() {
     int ret;
     int reuse;
-    struct sockaddr_in my_addr;
-    memset(&my_addr, 0, sizeof(my_addr));
-    my_addr.sin_family = AF_INET;
-    my_addr.sin_port = htons(std::atoi(port_.c_str()));
-    inet_aton(ip_.c_str(), &my_addr.sin_addr);
-    listen_fd_ = socket(AF_INET, SOCK_STREAM, 0);
-    if (listen_fd_ < 0) {
-      perror("socket");
+    struct addrinfo hints;
+    struct addrinfo *result;
+    struct addrinfo *rp;
+    memset(&hints, 0, sizeof(struct addrinfo));
+    bool ipv6 = true; 
+    if (ipv6) {
+      hints.ai_family = AF_INET6;
+      hints.ai_socktype = SOCK_STREAM;
+      hints.ai_protocol = 0;
+      hints.ai_canonname = NULL;
+      hints.ai_addr = NULL;
+      hints.ai_next = NULL;
+      ret = getaddrinfo(ip_.c_str(), port_.c_str(),&hints, &result);
+      if (ret != 0) {
+        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(ret));
+        exit(EXIT_FAILURE);
+      }
+    }
+    else {
+      hints.ai_family = AF_INET;
+      hints.ai_socktype = SOCK_STREAM;
+      hints.ai_protocol = 0;
+      hints.ai_canonname = NULL;
+      hints.ai_addr = NULL;
+      hints.ai_next = NULL;
+      ret = getaddrinfo(ip_.c_str(), port_.c_str(),&hints, &result);
+      if (ret != 0) {
+        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(ret));
+        exit(EXIT_FAILURE);
+      }
+    }
+
+    for (rp = result; rp != NULL; rp = rp->ai_next) {
+      listen_fd_ = socket(rp->ai_family, rp->ai_socktype,
+                   rp->ai_protocol);
+      if (listen_fd_ == -1)
+        continue;
+      ret = setsockopt( listen_fd_, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
+
+      if (bind(listen_fd_ , rp->ai_addr, rp->ai_addrlen) == 0)
+        break;                  /* Success */
+
+      close(listen_fd_);
+    }
+
+    if (rp == NULL) {               /* No address succeeded */
+      fprintf(stderr, "Could not bind\n");
       exit(EXIT_FAILURE);
     }
+
     reuse = 1;
-    ret = setsockopt( listen_fd_, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
-    ret = bind(listen_fd_, (struct sockaddr*)&my_addr, sizeof(my_addr));
-    if (ret < 0) {
-      perror("bind");
-      exit(EXIT_FAILURE);
-    }
     ret = listen(listen_fd_, 1024);
     if (ret < 0) {
       perror("listen");
@@ -119,21 +153,22 @@ private:
   }
  
   int handleAccept(int listen_fd) {
-    struct sockaddr_in client;
-    socklen_t addrlen = sizeof(client);
-    int conn_sock = accept(listen_fd, (struct sockaddr *) &client, &addrlen);
+    int ret;
+    struct sockaddr_storage peer_addr;
+    socklen_t peer_addr_len;
+    peer_addr_len = sizeof(struct sockaddr_storage);
+    int conn_sock = accept(listen_fd, (struct sockaddr *) &peer_addr, &peer_addr_len);
     if (conn_sock == -1) {
       perror("listen");
       exit(EXIT_FAILURE);
     }
-
-    char clntName[INET6_ADDRSTRLEN];
-    char portName[6];
-    if(getnameinfo((const sockaddr*)&client, sizeof(client),
-                   clntName, sizeof(clntName),
-                   portName, sizeof(portName),
-                   NI_NUMERICHOST|NI_NUMERICSERV)==0){
-      std::cout << "client addr: " << clntName << ':' << portName << '\n';
+     
+    char host[NI_MAXHOST], service[NI_MAXSERV];
+    ret = getnameinfo((struct sockaddr *) &peer_addr,
+                    peer_addr_len, host, NI_MAXHOST,
+                    service, NI_MAXSERV, NI_NUMERICSERV);
+    if (ret == 0) {
+      std::cout << "client addr: " << host << ':' << service << '\n';
     } else {
       std::cout << "Unable to get address" << '\n';
     }

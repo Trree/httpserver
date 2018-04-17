@@ -11,7 +11,7 @@ using namespace httpserver;
 
 int main()
 {
-  HttpServer server("0.0.0.0", "9999");
+  HttpServer server("::", "9999");
   server.handleEvent();
 
   return 0;
