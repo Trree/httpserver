@@ -1,7 +1,6 @@
 #ifndef HTTP_SREVER_SERVER_HPP_
 #define HTTP_SREVER_SERVER_HPP_ 
 
-#include "connection.hpp"
 #include "connection_manager.hpp"
 #include "event.hpp"
 #include <sys/types.h>
@@ -15,8 +14,6 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <netdb.h> 
-#include <memory>
-#include <map>
 #include <exception>
 
 namespace httpserver {

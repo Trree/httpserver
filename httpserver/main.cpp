@@ -5,7 +5,6 @@
 	> Created Time: Fri Feb  9 23:47:02 2018
  ************************************************************************/
 #include "server.hpp"
-#include<iostream>
 
 using namespace httpserver;
 

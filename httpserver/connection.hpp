@@ -3,10 +3,7 @@
 
 #include "request.hpp"
 #include "buffer.hpp"
-#include <string.h>
 #include <unistd.h>
-#include <sys/types.h>
-#include <sys/socket.h>
 #include <string>
 #include <memory>
 #include <chrono>

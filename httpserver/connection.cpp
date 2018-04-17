@@ -2,6 +2,8 @@
 #include "connection.hpp"
 #include "connection_manager.hpp"
 #include <string>
+#include <sys/types.h>
+#include <sys/socket.h>
 
 namespace httpserver {
 
