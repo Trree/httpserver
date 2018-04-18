@@ -2,6 +2,7 @@
 #define HTTP_SREVER_SERVER_HPP_ 
 
 #include "connection_manager.hpp"
+#include "socket.hpp"
 #include "event.hpp"
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -26,16 +27,13 @@ public:
   HttpServer& operator=(const HttpServer&) = delete;
   
   explicit HttpServer(const std::string& ip = "::", 
-                      const std::string& port = "9999", 
-                      const std::string rootdir = "/var/www/html/") 
-  : ip_(ip), port_(port), rootdir_(rootdir), event_(){
-    bindAndListen();
-    event_.add(listen_fd_, 0, EPOLLIN);
+                      const std::string& port = "9999")
+  : socket_(ip, port), event_(){
+    socket_.listen();
+    event_.add(socket_.getfd(), 0, EPOLLIN);
   }
-  ~HttpServer() {
-    close(listen_fd_);
-    listen_fd_ = -1;
-  }
+
+  ~HttpServer() {}
 
   void handleEvent() {
     auto timer = [&]() { 
@@ -65,7 +63,7 @@ public:
         try {
           if (revents & EPOLLIN) {
             if (event.data.u64  == 0) {
-              int fd = handleAccept(listen_fd_);
+              int fd = handleAccept(socket_.getfd());
               uint32_t num = connections_manager_.start(fd);
               event_.add(fd, num, EPOLLIN|EPOLLET);
             }
@@ -88,68 +86,6 @@ public:
 
 private:
 
-  void bindAndListen() {
-    int ret;
-    int reuse;
-    struct addrinfo hints;
-    struct addrinfo *result;
-    struct addrinfo *rp;
-    memset(&hints, 0, sizeof(struct addrinfo));
-    bool ipv6 = true; 
-    if (ipv6) {
-      hints.ai_family = AF_INET6;
-      hints.ai_socktype = SOCK_STREAM;
-      hints.ai_protocol = 0;
-      hints.ai_canonname = NULL;
-      hints.ai_addr = NULL;
-      hints.ai_next = NULL;
-      ret = getaddrinfo(ip_.c_str(), port_.c_str(),&hints, &result);
-      if (ret != 0) {
-        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(ret));
-        exit(EXIT_FAILURE);
-      }
-    }
-    else {
-      hints.ai_family = AF_INET;
-      hints.ai_socktype = SOCK_STREAM;
-      hints.ai_protocol = 0;
-      hints.ai_canonname = NULL;
-      hints.ai_addr = NULL;
-      hints.ai_next = NULL;
-      ret = getaddrinfo(ip_.c_str(), port_.c_str(),&hints, &result);
-      if (ret != 0) {
-        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(ret));
-        exit(EXIT_FAILURE);
-      }
-    }
-
-    for (rp = result; rp != NULL; rp = rp->ai_next) {
-      listen_fd_ = socket(rp->ai_family, rp->ai_socktype,
-                   rp->ai_protocol);
-      if (listen_fd_ == -1)
-        continue;
-      reuse = 1;
-      ret = setsockopt( listen_fd_, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
-
-      if (bind(listen_fd_ , rp->ai_addr, rp->ai_addrlen) == 0)
-        break;                  /* Success */
-
-      close(listen_fd_);
-    }
-
-    if (rp == NULL) {               /* No address succeeded */
-      fprintf(stderr, "Could not bind\n");
-      exit(EXIT_FAILURE);
-    }
-    freeaddrinfo(result);
-
-    ret = listen(listen_fd_, 1024);
-    if (ret < 0) {
-      perror("listen");
-      exit(EXIT_FAILURE);
-    }
-  }
- 
   int handleAccept(int listen_fd) {
     struct sockaddr_storage peer_addr;
     socklen_t peer_addr_len = sizeof(struct sockaddr_storage);
@@ -189,10 +125,7 @@ private:
     }
   }
 
-  std::string ip_;
-  std::string port_;
-  std::string rootdir_;
-  int listen_fd_ = -1;
+  Socket socket_;
   Event event_;
   ConnectionManager connections_manager_;
 };
