@@ -23,7 +23,7 @@ public:
     response_.append("HTTP/1.1 200 OK\r\n");
     setResponseHeader("Content-Length", std::to_string(body_.size()));
     setResponseHeader("Content-Type", "text/html");
-    response_ += to_string(re_);
+    response_ += header_to_string();
     return response_.append(body_);
   }
 
@@ -33,9 +33,9 @@ private:
     re_.insert(std::pair<std::string, std::string>(key, value));
   }
 
-  std::string to_string(std::map<std::string, std::string> header){
+  std::string header_to_string(){
     std::string response;
-     for (auto value : header) {
+     for (auto value : re_) {
       response.append(value.first);
       response.append(": ");
       response.append(value.second);

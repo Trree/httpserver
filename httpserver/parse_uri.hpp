@@ -22,7 +22,7 @@ public:
     std::string requestline = request.substr(0, n);
     handleRequestUri(requestline);
     auto headlen = request.find("\r\n\r\n");
-    std::cout << "The request line: " << requestline << '\n';
+    std::cout << requestline << '\n';
     std::string header = request.substr(n, headlen);
     getRequestHeader(header);
   }
