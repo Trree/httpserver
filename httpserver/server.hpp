@@ -173,9 +173,6 @@ private:
 
     setNonBlocking(conn_sock);
 
-    int optval = 1;
-    socklen_t optlen = sizeof(optval);
-    setsockopt(conn_sock, SOL_SOCKET, SO_KEEPALIVE, &optval, optlen);
     return conn_sock;
   }
 

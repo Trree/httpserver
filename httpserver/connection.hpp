@@ -30,6 +30,7 @@ public:
   : fd_(fd), 
     key_(key),
     status_(StatusType::established),
+    keepalive_(false);
     end_time_(std::chrono::high_resolution_clock::now()),
     connections_manager_(cm) {}
   ~Connection() {
@@ -44,7 +45,7 @@ public:
   void setFd(int fd);
   int getKey();
   std::chrono::high_resolution_clock::time_point getExpiredTime() {
-    return end_time_ + std::chrono::seconds(15);
+    return end_time_ + std::chrono::seconds(keepalivetimeout_);
   }
   void setStatus(StatusType status) {
     status_ = status;
@@ -61,6 +62,8 @@ private:
   uint64_t key_;
   Buffer buffer_;
   StatusType status_{StatusType::closed};
+  bool keepalive_;
+  int keepalivetimeout_ = 15;
   std::chrono::high_resolution_clock::time_point end_time_;
   ConnectionManager &connections_manager_;
 };

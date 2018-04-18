@@ -23,6 +23,7 @@ public:
     response_.append("HTTP/1.1 200 OK\r\n");
     setResponseHeader("Content-Length", std::to_string(body_.size()));
     setResponseHeader("Content-Type", "text/html");
+    setResponseHeader("Connection", "Keep-Alive");
     response_ += header_to_string();
     return response_.append(body_);
   }

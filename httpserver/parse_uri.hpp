@@ -43,6 +43,17 @@ public:
     return reqheader_;
   }
 
+  bool setKeepalive() {
+    auto search = reqheader_.find("Connection");
+    if (search == reqheader_.end()) {
+      return false;
+    }
+    if (reqheader_.at("Connection") == "Keep-Alive") {
+      return true;
+    }
+    return false;
+  }
+
 private:
 
   std::string& trim(std::string &s)
