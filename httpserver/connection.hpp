@@ -1,12 +1,13 @@
 #ifndef HTTP_SREVER_CONNECTION_HPP_
 #define HTTP_SREVER_CONNECTION_HPP_
 
-#include "request.hpp"
 #include "buffer.hpp"
+#include "http/request.hpp"
 #include <unistd.h>
 #include <string>
 #include <memory>
 #include <chrono>
+#include <iostream>
 
 #define MAXLEN 4096
 
@@ -30,7 +31,7 @@ public:
   : fd_(fd), 
     key_(key),
     status_(StatusType::established),
-    keepalive_(false);
+    keepalive_(false),
     end_time_(std::chrono::high_resolution_clock::now()),
     connections_manager_(cm) {}
   ~Connection() {
