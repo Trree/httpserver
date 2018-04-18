@@ -128,6 +128,7 @@ private:
                    rp->ai_protocol);
       if (listen_fd_ == -1)
         continue;
+      reuse = 1;
       ret = setsockopt( listen_fd_, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
 
       if (bind(listen_fd_ , rp->ai_addr, rp->ai_addrlen) == 0)
@@ -140,8 +141,8 @@ private:
       fprintf(stderr, "Could not bind\n");
       exit(EXIT_FAILURE);
     }
+    freeaddrinfo(result);
 
-    reuse = 1;
     ret = listen(listen_fd_, 1024);
     if (ret < 0) {
       perror("listen");
@@ -150,16 +151,15 @@ private:
   }
  
   int handleAccept(int listen_fd) {
-    int ret;
     struct sockaddr_storage peer_addr;
-    socklen_t peer_addr_len;
-    peer_addr_len = sizeof(struct sockaddr_storage);
+    socklen_t peer_addr_len = sizeof(struct sockaddr_storage);
     int conn_sock = accept(listen_fd, (struct sockaddr *) &peer_addr, &peer_addr_len);
     if (conn_sock == -1) {
       perror("listen");
       exit(EXIT_FAILURE);
     }
      
+    int ret;
     char host[NI_MAXHOST], service[NI_MAXSERV];
     ret = getnameinfo((struct sockaddr *) &peer_addr,
                     peer_addr_len, host, NI_MAXHOST,

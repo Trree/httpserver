@@ -21,6 +21,10 @@ public:
     auto n = request.find("\r\n");
     std::string requestline = request.substr(0, n);
     handleRequestUri(requestline);
+    auto headlen = request.find("\r\n\r\n");
+    std::cout << "The request line: " << requestline << '\n';
+    std::string header = request.substr(n, headlen);
+    getRequestHeader(header);
   }
 
   const std::string getMethod() const {
@@ -35,7 +39,47 @@ public:
     return version_;
   }
 
+  const std::map<std::string, std::string> getHeader() const {
+    return reqheader_;
+  }
+
 private:
+
+  std::string& trim(std::string &s)
+  {
+    if (s.empty()){
+      return s;
+    }
+    s.erase(0,s.find_first_not_of(" "));
+    s.erase(s.find_last_not_of(" ") + 1);
+    return s;
+  }
+
+  void getRequestHeader(std::string& header) {
+    std::istringstream iss(header);
+    std::vector<std::string> tokens;
+    std::string key;
+    std::string value;
+    std::string item;
+    while (std::getline(iss, item)) {
+      auto n = item.find(':');
+      if (n == std::string::npos) {
+        continue;
+      }
+      key = item.substr(0, n);
+      value = item.substr(n+1);
+      if (key.empty() || value.empty()) {
+        continue;
+      }
+      key = trim(key);
+      value = trim(value);
+      reqheader_.insert(std::pair<std::string, std::string>(key, value));
+    }
+
+    for (auto p : reqheader_) {
+      std::cout << p.first << ":" << p.second << '\n';
+    }
+  }
 
   void handleRequestUri(std::string &requestline) {
     std::istringstream iss(requestline);
@@ -51,6 +95,7 @@ private:
   std::string method_;
   std::string requesturi_;
   std::string version_;
+  std::map<std::string, std::string> reqheader_;
   std::vector<std::map<std::string, std::string>> headers_;
 };
 

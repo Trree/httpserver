@@ -21,15 +21,18 @@ public:
    
     response_.clear();
     response_.append("HTTP/1.1 200 OK\r\n");
-    re_.insert(std::pair<std::string, std::string>
-        ("Content-Length", std::to_string(body_.size())));
-    re_.insert(std::pair<std::string, std::string>
-        ("Content-Type", "text/html"));
+    setResponseHeader("Content-Length", std::to_string(body_.size()));
+    setResponseHeader("Content-Type", "text/html");
     response_ += to_string(re_);
     return response_.append(body_);
   }
 
 private:
+
+  void setResponseHeader(std::string key, std::string value) {
+    re_.insert(std::pair<std::string, std::string>(key, value));
+  }
+
   std::string to_string(std::map<std::string, std::string> header){
     std::string response;
      for (auto value : header) {
