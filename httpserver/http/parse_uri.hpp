@@ -76,6 +76,9 @@ private:
     std::string value;
     std::string item;
     while (std::getline(iss, item)) {
+      if (item.back() == '\r') {
+        item = item.substr(0, item.size() - 1);
+      }
       auto n = item.find(':');
       if (n == std::string::npos) {
         continue;

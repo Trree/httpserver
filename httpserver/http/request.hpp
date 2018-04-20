@@ -12,7 +12,11 @@ class Connection;
 
 class Request {
 public:
-  Request(std::shared_ptr<Connection> connptr, std::string& header) : connptr_(connptr),  parseuri_(header), resp_(){}
+  Request(const Request&) = delete;
+  Request& operator=(const Request) = delete;
+
+  Request(std::shared_ptr<Connection> connptr, std::string& header) 
+  : connptr_(connptr),  parseuri_(header), resp_(){}
 
   std::string handleRequest(); 
 private:
