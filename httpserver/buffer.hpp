@@ -9,8 +9,9 @@ namespace httpserver {
 class Buffer {
 public:
   Buffer(const Buffer&) = delete;
-  Buffer(Buffer&&) = default;
   Buffer& operator=(const Buffer&) = delete;
+  
+  Buffer(Buffer&&) = default;
   Buffer& operator=(Buffer&&) = default;
 
   Buffer() {}

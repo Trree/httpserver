@@ -4,6 +4,7 @@ SET(CMAKE_C_COMPILER "g++")
 # The version number.
 set (Tutorial_VERSION_MAJOR 1)
 set (Tutorial_VERSION_MINOR 0)
+
 # configure a header file to pass some of the CMake settings
 # to the source code
 #configure_file (
@@ -11,6 +12,7 @@ set (Tutorial_VERSION_MINOR 0)
 #"${PROJECT_BINARY_DIR}/share/tcp_server.h"
 #
 #)
+
 option(Indefinite_ENABLE_TESTING "Enable testing of the library." ON)
 
 add_library(http_runtime SHARED

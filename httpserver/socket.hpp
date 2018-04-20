@@ -20,7 +20,6 @@ public:
   Socket(int fd) : fd_(fd) {}
   explicit Socket(const std::string& addr, const std::string& port) {
     int ret;
-    int reuse;
     struct addrinfo hints;
     struct addrinfo *result;
     struct addrinfo *rp;
@@ -58,7 +57,7 @@ public:
                    rp->ai_protocol);
       if (fd_ == -1)
         continue;
-      reuse = 1;
+      int reuse = 1;
       ret = setsockopt( fd_, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
 
       if (bind(fd_ , rp->ai_addr, rp->ai_addrlen) == 0)
