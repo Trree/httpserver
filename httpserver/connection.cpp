@@ -9,10 +9,13 @@ namespace httpserver {
 
 void Connection::start() {
   if (handleRead() && buffer_.isReady()) {
-    Request req(buffer_.getBuffer());
+    Request req(shared_from_this(), buffer_.getBuffer());
     std::string response = req.handleRequest();
     handleWrite(response);
     setStatus(StatusType::closed);
+    if (!getKeepalive()) {
+      stop();
+    }
   }
 }
 
@@ -97,12 +100,14 @@ int Connection::handleWrite(std::string response)
   ssize_t wlen = 0;
   int size = response.size();
   const char *buffer = response.c_str();
+
+
   for (;;) {
     wlen = send(fd_, buffer, size, 0);
     if (wlen == 0) {
       return 0;
     }
-
+    
     if (wlen == -1) {
       if (errno == EAGAIN) {
         break;

@@ -56,6 +56,12 @@ public:
   bool handleRead();
   int Read(char* buffer, size_t size); 
   bool isComplete(std::string header);
+  void setKeepalive(bool on) {
+    keepalive_ = on;
+  }
+  bool getKeepalive() {
+    return keepalive_;
+  }
 
 private:
 

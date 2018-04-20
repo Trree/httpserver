@@ -17,7 +17,7 @@ public:
   ParseUri& operator=(const ParseUri&) = delete;
   
   ParseUri() {}
-  explicit ParseUri(std::string request) : method_("GET"), requesturi_("/index.html"), version_("HTTP/1.1") {
+  explicit ParseUri(std::string& request) : method_("GET"), requesturi_("/index.html"), version_("HTTP/1.1") {
     auto n = request.find("\r\n");
     std::string requestline = request.substr(0, n);
     handleRequestUri(requestline);
@@ -25,6 +25,7 @@ public:
     std::cout << requestline << '\n';
     std::string header = request.substr(n, headlen);
     getRequestHeader(header);
+    request.clear();
   }
 
   const std::string getMethod() const {
@@ -43,12 +44,14 @@ public:
     return reqheader_;
   }
 
-  bool setKeepalive() {
+  bool isKeepalive() {
     auto search = reqheader_.find("Connection");
     if (search == reqheader_.end()) {
       return false;
     }
-    if (reqheader_.at("Connection") == "Keep-Alive") {
+    std::string data = reqheader_.at("Connection");
+    std::transform(data.begin(), data.end(), data.begin(), ::tolower);
+    if (data == "keep-alive") {
       return true;
     }
     return false;

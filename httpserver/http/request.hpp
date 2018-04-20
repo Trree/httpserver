@@ -4,22 +4,21 @@
 #include <string>
 #include "response.hpp"
 #include "parse_uri.hpp"
+#include <memory>
 
 namespace httpserver{
 
+class Connection;
+
 class Request {
 public:
-  Request(std::string header) : parseuri_(header), resp_(){}
-  std::string handleRequest() {
-    std::string response;
-    std::string rootdir("/var/www/html");
-    response = resp_.handleResponse(rootdir, parseuri_.getRequestUri());
-    return response; 
-  }
+  Request(std::shared_ptr<Connection> connptr, std::string& header) : connptr_(connptr),  parseuri_(header), resp_(){}
 
+  std::string handleRequest(); 
 private:
- ParseUri parseuri_;
- Response resp_;
+  std::shared_ptr<Connection> connptr_;
+  ParseUri parseuri_;
+  Response resp_;
 };
 
 } // namespace httpserver

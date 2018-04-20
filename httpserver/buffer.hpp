@@ -27,7 +27,7 @@ public:
     return request_;
   }
 
-  const std::string getBuffer() const {
+  std::string& getBuffer() {
     return request_;
   }
 
