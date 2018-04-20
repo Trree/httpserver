@@ -13,13 +13,26 @@ set (Tutorial_VERSION_MINOR 0)
 #)
 option(Indefinite_ENABLE_TESTING "Enable testing of the library." ON)
 
+add_library(http_runtime SHARED
+  http/request.cpp 
+  http/response.cpp 
+)
+
+target_sources(http_runtime PRIVATE
+  connection.cpp
+  server.cpp
+  main.cpp
+)
 
 # add the binary tree to the search path for include files
 # so that we will find TutorialConfig.h
 ADD_DEFINITIONS(-std=c++11 -g3 -W -Wall -pedantic -D_GNU_SOURCE)
 
 # add the executable
-add_executable(${PROJECT_NAME} http/request.cpp http/response.cpp connection.cpp main.cpp)
+#add_executable(${PROJECT_NAME} http/request.cpp http/response.cpp connection.cpp server.cpp main.cpp)
+add_executable(${PROJECT_NAME}  main.cpp)
+
+target_link_libraries(${PROJECT_NAME} http_runtime)
 
 if (Indefinite_ENABLE_TESTING)
   enable_testing()
