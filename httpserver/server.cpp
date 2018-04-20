@@ -1,5 +1,6 @@
 #include "server.hpp"
 #include "connection.hpp"
+#include "socket.hpp"
 
 namespace httpserver {
 
@@ -9,7 +10,7 @@ void HttpServer::handleEvent() {
     connections_manager_.regularClean();
   };
   for (;;) {
-    int nfds = epoll_wait(event_.getEpollFd(), event_.events_, 100, 5000);
+    int nfds = epoll_wait(event_.getEpollFd(), event_.events_, 100, 15000);
     if (nfds < 0) {
       std::cout << "epoll_wait() error" << errno << strerror(errno) << '\n';
       continue;
@@ -31,8 +32,9 @@ void HttpServer::handleEvent() {
       try {
         if (revents & EPOLLIN) {
           if (event.data.u64  == 0) {
-            int fd = handleAccept(socket_.getfd());
-            uint32_t num = connections_manager_.start(fd);
+            Socket socket= handleAccept(socket_.getfd());
+            int fd = socket.getfd();
+            uint32_t num = connections_manager_.start(std::move(socket));
             event_.add(fd, num, EPOLLIN|EPOLLET);
           }
           else {

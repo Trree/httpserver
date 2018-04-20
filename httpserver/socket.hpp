@@ -7,6 +7,9 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <string>
+#include <unistd.h>
+#include <fcntl.h>
+#include <string.h>
 
 namespace httpserver {
 class Socket {
@@ -14,6 +17,7 @@ public:
   Socket(const Socket&) = delete;
   Socket& operator=(const Socket&) = delete;
 
+  Socket(int fd) : fd_(fd) {}
   explicit Socket(const std::string& addr, const std::string& port) {
     int ret;
     int reuse;
@@ -70,6 +74,16 @@ public:
     freeaddrinfo(result);
   }
 
+  Socket(Socket&& other) : fd_(other.fd_) {
+    other.fd_ = -1;
+  }
+
+  Socket& operator=(Socket&& other) {
+    fd_ = other.fd_;
+    other.fd_ = -1;
+    return *this;
+  }
+
   void listen() {
     int ret;
     ret = ::listen(fd_, 1024);
@@ -86,6 +100,19 @@ public:
   ~Socket() {
     close(fd_);
     fd_ = -1;
+  }
+
+  void setNonBlocking(){
+    int opts;
+    if ((opts = fcntl(fd_, F_GETFL)) < 0) {
+      printf("GETFL %d failed", fd_);
+      exit(1);
+    }
+    opts = opts | O_NONBLOCK;
+    if (fcntl(fd_, F_SETFL, opts) < 0) {
+      printf("SETFL %d failed", fd_);
+      exit(1);
+    }
   }
 
 private:

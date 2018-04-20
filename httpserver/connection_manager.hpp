@@ -4,6 +4,7 @@
 #include "connection.hpp"
 #include <memory>
 #include <map>
+#include "socket.hpp"
 
 namespace httpserver {
 
@@ -17,14 +18,14 @@ public:
   ConnectionManager() : max_(0) {}
   ~ConnectionManager(){}
   
-  uint64_t start(int fd) {
+  uint64_t start(Socket socket) {
     max_++;
     auto search = connections_.find(max_);
     while (max_ == 0 || search != connections_.end()) {
       max_++;
       search = connections_.find(max_);
     }
-    connections_.insert(std::pair<uint64_t, connection_ptr>(max_, std::make_shared<Connection>(fd, max_, *this)));
+    connections_.insert(std::pair<uint64_t, connection_ptr>(max_, std::make_shared<Connection>(std::move(socket), max_, *this)));
     return max_;
   }
 

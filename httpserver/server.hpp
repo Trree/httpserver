@@ -39,11 +39,11 @@ public:
 
 private:
 
-  int handleAccept(int listen_fd) {
+  Socket handleAccept(int listen_fd) {
     struct sockaddr_storage peer_addr;
     socklen_t peer_addr_len = sizeof(struct sockaddr_storage);
-    int conn_sock = accept(listen_fd, (struct sockaddr *) &peer_addr, &peer_addr_len);
-    if (conn_sock == -1) {
+    Socket conn_sock = accept(listen_fd, (struct sockaddr *) &peer_addr, &peer_addr_len);
+    if (conn_sock.getfd() == -1) {
       perror("listen");
       exit(EXIT_FAILURE);
     }
@@ -58,24 +58,11 @@ private:
     } else {
       std::cout << "Unable to get address" << '\n';
     }
-    std::cout << "the connect fd is: " << conn_sock << '\n';
+    std::cout << "the connect fd is: " << conn_sock.getfd() << '\n';
 
-    setNonBlocking(conn_sock);
+    conn_sock.setNonBlocking();
 
     return conn_sock;
-  }
-
-  void setNonBlocking(int sock){
-    int opts;
-    if ((opts = fcntl(sock, F_GETFL)) < 0) {
-      printf("GETFL %d failed", sock);
-      exit(1);
-    }
-    opts = opts | O_NONBLOCK;
-    if (fcntl(sock, F_SETFL, opts) < 0) {
-      printf("SETFL %d failed", sock);
-      exit(1);
-    }
   }
 
   Socket socket_;

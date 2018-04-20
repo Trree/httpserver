@@ -23,16 +23,6 @@ void Connection::stop()
   connections_manager_.stop(getKey());
 }
 
-int Connection::getFd() 
-{
-  return fd_;
-}
-
-void Connection::setFd(int fd) 
-{
-  fd_ = fd;
-}
-
 int Connection::getKey()
 {
   return key_;
@@ -43,7 +33,7 @@ int Connection::Read(char* buffer, size_t size)
   std::cout << "Start read ..." << '\n';
   ssize_t n = 0;
   for(;;) {
-    n = recv(fd_, buffer, size, 0);
+    n = recv(socket_.getfd(), buffer, size, 0);
 
     if (n == 0) {
       return 0;
@@ -51,7 +41,7 @@ int Connection::Read(char* buffer, size_t size)
 
     if (n > 0) {
       buffer_.assignBuffer(buffer, size);
-      std::cout << "recv: fd:" << fd_ << ' ' << "flag: " << key_ << ' '<< n << " of" << ' ' << size << '\n'; 
+      std::cout << "recv: fd:" << socket_.getfd() << ' ' << "flag: " << key_ << ' '<< n << " of" << ' ' << size << '\n'; 
     }
 
     if (n == -1 && errno == EAGAIN) {
@@ -102,7 +92,7 @@ int Connection::handleWrite(std::string response)
 
 
   for (;;) {
-    wlen = send(fd_, buffer, size, 0);
+    wlen = send(socket_.getfd(), buffer, size, 0);
     if (wlen == 0) {
       return 0;
     }
@@ -114,7 +104,7 @@ int Connection::handleWrite(std::string response)
       std::cout << "send: wlen: " << wlen << " errno: " <<  errno << " " << strerror(errno) << '\n';
       return -1;
     }
-    std::cout << "send: fd:" << fd_ << ' ' << wlen << " of" << ' ' << size << '\n'; 
+    std::cout << "send: fd:" << socket_.getfd() << ' ' << wlen << " of" << ' ' << size << '\n'; 
     buffer += wlen;
     size -= wlen;
   }

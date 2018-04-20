@@ -1,6 +1,7 @@
 #ifndef HTTP_SREVER_CONNECTION_HPP_
 #define HTTP_SREVER_CONNECTION_HPP_
 
+#include "socket.hpp"
 #include "buffer.hpp"
 #include "http/request.hpp"
 #include <unistd.h>
@@ -8,6 +9,7 @@
 #include <memory>
 #include <chrono>
 #include <iostream>
+
 
 #define MAXLEN 4096
 
@@ -17,8 +19,7 @@ class ConnectionManager;
 
 class Connection : public std::enable_shared_from_this<Connection> {
 public:
-  Connection(const Connection&) = delete;
-  Connection& operator=(const Connection&) = delete;
+  Connection(const Connection&) = delete; Connection& operator=(const Connection&) = delete;
  
   enum class StatusType {
     closed,
@@ -27,23 +28,19 @@ public:
     write
   } status; 
  
-  explicit Connection(int fd, uint64_t key, ConnectionManager& cm) 
-  : fd_(fd), 
+  explicit Connection(Socket socket, uint64_t key, ConnectionManager& cm) 
+  : socket_(std::move(socket)), 
     key_(key),
     status_(StatusType::established),
     keepalive_(false),
     end_time_(std::chrono::high_resolution_clock::now()),
     connections_manager_(cm) {}
   ~Connection() {
-    std::cout << "destruction connection " << fd_ << '\n';
-    close(fd_);
-    fd_ = -1;
+    std::cout << "destruction connection " << socket_.getfd() << '\n';
   }
 
   void start(); 
   void stop(); 
-  int getFd();
-  void setFd(int fd);
   int getKey();
   std::chrono::high_resolution_clock::time_point getExpiredTime() {
     return end_time_ + std::chrono::seconds(keepalivetimeout_);
@@ -65,7 +62,7 @@ public:
 
 private:
 
-  int fd_{-1};
+  Socket socket_;
   uint64_t key_;
   Buffer buffer_;
   StatusType status_{StatusType::closed};
