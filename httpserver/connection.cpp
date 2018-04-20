@@ -4,11 +4,13 @@
 #include <string>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <functional>
 
 namespace httpserver {
 
 void Connection::start() {
   if (handleRead() && buffer_.isReady()) {
+    std::function<void(std::shared_ptr<Connection>, std::string&)> handleMessage = handleHttpMessage;
     handleMessage(shared_from_this(), buffer_.getBuffer());
     setStatus(StatusType::closed);
     if (!getKeepalive()) {
@@ -66,6 +68,7 @@ bool Connection::handleRead()
     stop();
     return false;
   }
+  std::function<bool(std::string)> isComplete = isHttpComplete;
   if (!isComplete(buffer_.getBuffer())) {
     return false;
   }
