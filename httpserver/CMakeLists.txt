@@ -14,7 +14,7 @@ set (Tutorial_VERSION_MINOR 0)
 option(Indefinite_ENABLE_TESTING "Enable testing of the library." ON)
 
 add_library(http_runtime SHARED
-  http/request.cpp 
+  http/handleMessage.cpp
   http/response.cpp 
 )
 

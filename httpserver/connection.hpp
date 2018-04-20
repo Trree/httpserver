@@ -3,7 +3,6 @@
 
 #include "socket.hpp"
 #include "buffer.hpp"
-#include "http/request.hpp"
 #include <unistd.h>
 #include <string>
 #include <memory>

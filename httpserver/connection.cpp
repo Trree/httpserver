@@ -1,4 +1,4 @@
-
+#include "http/handleMessage.hpp"
 #include "connection.hpp"
 #include "connection_manager.hpp"
 #include <string>
@@ -9,8 +9,7 @@ namespace httpserver {
 
 void Connection::start() {
   if (handleRead() && buffer_.isReady()) {
-    Request req(shared_from_this(), buffer_.getBuffer());
-    std::string response = req.handleRequest();
+    handleMessage(shared_from_this(), buffer_.getBuffer());
     setStatus(StatusType::closed);
     if (!getKeepalive()) {
       stop();
