@@ -9,7 +9,7 @@ std::string Request::handleRequest() {
   }
   std::string response;
   std::string rootdir("/var/www/html");
-  response = resp_.handleResponse(rootdir, parseuri_.getRequestUri());
+  resp_.handleResponse(rootdir, parseuri_.getRequestUri());
   return response; 
 }
 

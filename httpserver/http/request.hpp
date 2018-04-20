@@ -16,7 +16,7 @@ public:
   Request& operator=(const Request) = delete;
 
   Request(std::shared_ptr<Connection> connptr, std::string& header) 
-  : connptr_(connptr),  parseuri_(header), resp_(){}
+  : connptr_(connptr),  parseuri_(header), resp_(connptr){}
 
   std::string handleRequest(); 
 private:

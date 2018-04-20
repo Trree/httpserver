@@ -11,7 +11,6 @@ void Connection::start() {
   if (handleRead() && buffer_.isReady()) {
     Request req(shared_from_this(), buffer_.getBuffer());
     std::string response = req.handleRequest();
-    handleWrite(response);
     setStatus(StatusType::closed);
     if (!getKeepalive()) {
       stop();

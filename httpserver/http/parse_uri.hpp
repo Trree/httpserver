@@ -25,6 +25,7 @@ public:
     std::cout << requestline << '\n';
     std::string header = request.substr(n, headlen);
     getRequestHeader(header);
+    body_ = request.substr(headlen + 3);
     request.clear();
   }
 
@@ -113,6 +114,7 @@ private:
   std::string requesturi_;
   std::string version_;
   std::map<std::string, std::string> reqheader_;
+  std::string body_;
   std::vector<std::map<std::string, std::string>> headers_;
 };
 

@@ -7,26 +7,20 @@
 #include <utility>
 #include <fstream>
 #include <iterator>
+#include <memory>
 
 namespace httpserver {
+
+class Connection;
 
 class Response{
 public:
   Response(const Response&) = delete;
   Response& operator=(const Response&) = delete;
   
-  Response() {}
-  std::string handleResponse(std::string path, std::string rootdir) {
-    body_ = getBody(path, rootdir);
-   
-    response_.clear();
-    response_.append("HTTP/1.1 200 OK\r\n");
-    setResponseHeader("Content-Length", std::to_string(body_.size()));
-    setResponseHeader("Content-Type", "text/html");
-    setResponseHeader("Connection", "Keep-Alive");
-    response_ += header_to_string();
-    return response_.append(body_);
-  }
+  Response(std::shared_ptr<Connection> connptr) : connptr_(connptr){}
+  void handleResponse(std::string path, std::string rootdir);
+  std::string getBody(std::string path, std::string rootdir);
 
 private:
 
@@ -46,14 +40,8 @@ private:
     return response;
   }
 
-  std::string getBody(std::string path, std::string rootdir) {
-    std::string filepath = path.append(rootdir);
-    std::ifstream t(filepath);
-    std::string str((std::istreambuf_iterator<char>(t)),
-                    std::istreambuf_iterator<char>());
-    return str;  
-  }
 
+  std::shared_ptr<Connection> connptr_;
   std::string response_;
   std::map<std::string, std::string> re_;
   std::string body_;
