@@ -5,10 +5,6 @@
 #include "socket.hpp"
 #include "event.hpp"
 #include <string>
-#include <iostream>
-#include <cstdlib>
-#include <fcntl.h>
-#include <exception>
 
 namespace httpserver {
  
