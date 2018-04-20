@@ -51,7 +51,6 @@ public:
   int handleWrite(std::string response);
   bool handleRead();
   int Read(char* buffer, size_t size); 
-  bool isComplete(std::string header);
   void setKeepalive(bool on) {
     keepalive_ = on;
   }

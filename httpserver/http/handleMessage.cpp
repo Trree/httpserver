@@ -6,6 +6,14 @@
 
 namespace httpserver{
 
+bool isComplete(std::string buffer) {
+  auto n = buffer.find("\r\n\r\n");
+  if (n == std::string::npos) {
+    return false;
+  }
+  return true;
+}
+
 void handleMessage(std::shared_ptr<Connection> connptr, std::string& buffer) {
   ParseUri parseuri(buffer);
   Response response(connptr);

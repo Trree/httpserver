@@ -74,13 +74,6 @@ bool Connection::handleRead()
   return true;
 }
 
-bool Connection::isComplete(std::string header) {
-  auto n = header.find("\r\n\r\n");
-  if (n == std::string::npos) {
-    return false;
-  }
-  return true;
-}
 
 int Connection::handleWrite(std::string response)
 {
