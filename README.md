@@ -11,4 +11,8 @@ Implement epoll module, and can manager the life cycle of connection.
 ## v2.0
 
 - keepalive
+- exception
+- log
+- configure file
 - multi thread
+- reactor pattern
