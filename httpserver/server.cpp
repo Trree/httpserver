@@ -1,6 +1,7 @@
 #include "server.hpp"
 #include "connection.hpp"
 #include "socket.hpp"
+#include <sys/epoll.h>
 
 namespace httpserver {
 
