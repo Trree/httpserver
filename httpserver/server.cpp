@@ -4,6 +4,32 @@
 
 namespace httpserver {
 
+Socket HttpServer::handleAccept() {
+  struct sockaddr_storage peer_addr;
+  socklen_t peer_addr_len = sizeof(struct sockaddr_storage);
+  Socket conn_sock = accept(socket_.getfd(), (struct sockaddr *) &peer_addr, &peer_addr_len);
+  if (conn_sock.getfd() == -1) {
+    perror("listen");
+    exit(EXIT_FAILURE);
+  }
+   
+  int ret;
+  char host[NI_MAXHOST], service[NI_MAXSERV];
+  ret = getnameinfo((struct sockaddr *) &peer_addr,
+                  peer_addr_len, host, NI_MAXHOST,
+                  service, NI_MAXSERV, NI_NUMERICSERV);
+  if (ret == 0) {
+    std::cout << "client addr: " << host << ':' << service << '\n';
+  } else {
+    std::cout << "Unable to get address" << '\n';
+  }
+  std::cout << "the connect fd is: " << conn_sock.getfd() << '\n';
+
+  conn_sock.setNonBlocking();
+
+  return conn_sock;
+}
+
 void HttpServer::handleEvent() {
   auto timer = [&]() { 
     std::cout << "Start timer ..." << '\n';
@@ -32,7 +58,7 @@ void HttpServer::handleEvent() {
       try {
         if (revents & EPOLLIN) {
           if (event.data.u64  == 0) {
-            Socket socket= handleAccept(socket_.getfd());
+            Socket socket= handleAccept();
             int fd = socket.getfd();
             uint32_t num = connections_manager_.start(std::move(socket));
             event_.add(fd, num, EPOLLIN|EPOLLET);
