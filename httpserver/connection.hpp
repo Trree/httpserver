@@ -68,6 +68,9 @@ public:
 
   int sendfile() {
     file_.sendfile(socket_.getfd());
+    if (sendfinish() && !getKeepalive()) {
+      stop();
+    }
     return 0;
   }
 
