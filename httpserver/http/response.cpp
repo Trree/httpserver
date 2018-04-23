@@ -1,5 +1,9 @@
 #include "../connection.hpp"
 #include "response.hpp"
+#include <sys/sendfile.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 namespace httpserver {
 
@@ -22,8 +26,29 @@ void Response::handleResponse(std::string path, std::string rootdir) {
     setResponseHeader("Connection", "Keep-Alive");
   }
   response_ += header_to_string();
-  response_.append(body_);
+  //response_.append(body_);
   connptr_->handleWrite(response_);
+
+  std::string fromfile= path.append(rootdir);
+  int fromfd = open(fromfile.c_str(), O_RDONLY);
+  if (fromfd < 0) {
+    perror("open");
+  }
+  struct stat st;
+  stat(fromfile.c_str() ,&st);
+  int filelen = st.st_size;
+  off_t off = 0;
+  int sendlen = 0;
+  while (off < filelen) {
+    sendlen = sendfile(connptr_->getfd(), fromfd, &off, 2048);
+    if (sendlen < 0) {
+      break;
+    }
+   // off += sendlen;
+  }
+  
+  
+  close(fromfd);
 }
 
 

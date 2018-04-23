@@ -62,7 +62,6 @@ public:
 
       if (bind(fd_ , rp->ai_addr, rp->ai_addrlen) == 0)
         break;                  /* Success */
-
       close(fd_);
     }
 
@@ -110,6 +109,15 @@ public:
     opts = opts | O_NONBLOCK;
     if (fcntl(fd_, F_SETFL, opts) < 0) {
       printf("SETFL %d failed", fd_);
+      exit(1);
+    }
+  }
+  
+  void setReuseAddr(){
+    int reuse = 1;
+    int ret = setsockopt(fd_, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
+    if (ret < 0) {
+      printf("Set SO_REUSEADDR %d failed", fd_);
       exit(1);
     }
   }

@@ -27,7 +27,7 @@ public:
     write
   } status; 
  
-  explicit Connection(Socket socket, uint64_t key, ConnectionManager& cm) 
+  Connection(Socket socket, uint64_t key, ConnectionManager& cm) 
   : socket_(std::move(socket)), 
     key_(key),
     status_(StatusType::established),
@@ -46,6 +46,9 @@ public:
   }
   void setStatus(StatusType status) {
     status_ = status;
+  }
+  int getfd() {
+    return socket_.getfd();
   }
 
   int handleWrite(std::string response);

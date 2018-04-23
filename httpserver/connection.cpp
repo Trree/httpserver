@@ -89,11 +89,13 @@ int Connection::handleWrite(std::string response)
   for (;;) {
     wlen = send(socket_.getfd(), buffer, size, 0);
     if (wlen == 0) {
+      std::cout << "send: wlen: " << wlen << " errno: " <<  errno << " " << strerror(errno) << '\n';
       return 0;
     }
     
     if (wlen == -1) {
       if (errno == EAGAIN) {
+        std::cout << "send: wlen: " << wlen << " errno: " <<  errno << " " << strerror(errno) << '\n';
         break;
       }
       std::cout << "send: wlen: " << wlen << " errno: " <<  errno << " " << strerror(errno) << '\n';
