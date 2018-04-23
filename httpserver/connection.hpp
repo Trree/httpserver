@@ -3,12 +3,12 @@
 
 #include "socket.hpp"
 #include "buffer.hpp"
+#include "file.hpp"
 #include <unistd.h>
 #include <string>
 #include <memory>
 #include <chrono>
-#include <iostream>
-
+#include <iostream> 
 
 #define MAXLEN 4096
 
@@ -51,11 +51,6 @@ public:
     return socket_.getfd();
   }
 
-  int sendfile() {
-    buffer_.send(socket_.getfd());
-    return 0;
-  }
-
   int handleWrite(std::string response);
   bool handleRead();
   int Read(char* buffer, size_t size); 
@@ -66,8 +61,14 @@ public:
     return keepalive_;
   }
 
-  void setFile(std::string& filename) {
-    buffer_.setFile(filename);
+  void setFile(std::string filename) {
+    File file(filename);
+    file_ = std::move(file);
+  }
+
+  int sendfile() {
+    file_.sendfile(socket_.getfd());
+    return 0;
   }
 
 private:
@@ -75,6 +76,7 @@ private:
   Socket socket_;
   uint64_t key_;
   Buffer buffer_;
+  File file_;
   StatusType status_{StatusType::closed};
   bool keepalive_;
   int keepalivetimeout_ = 15;

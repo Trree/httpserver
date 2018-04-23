@@ -6,6 +6,7 @@
 #include <fcntl.h>
 #include <sys/sendfile.h>
 #include <string>
+#include <iostream>
 
 namespace httpserver {
 
@@ -15,7 +16,7 @@ public:
   File& operator=(const File&) = delete;
 
   File() : fd_(-1) {}
-  explicit File(std::string& filename) 
+  explicit File(std::string filename) 
   : name_(filename), offset_(0) 
   {
     fd_ = open(filename.c_str(), O_RDONLY);
@@ -58,6 +59,7 @@ public:
   }
 
   ~File() {
+    std::cout << "close filename " << name_ <<" : " << fd_ << '\n'; 
     close();
   }
 
