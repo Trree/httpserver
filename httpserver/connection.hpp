@@ -71,6 +71,10 @@ public:
     return 0;
   }
 
+  bool sendfinish() {
+    return file_.finish();
+  }
+
 private:
 
   Socket socket_;

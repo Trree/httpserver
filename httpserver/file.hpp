@@ -45,12 +45,21 @@ public:
   int sendfile(int fd) {
     int sendlen = 0;
     while (offset_ < filelen_) {
-      int sendlen = ::sendfile(fd, fd_, &offset_, 2048);
+      int sendlen = ::sendfile(fd, fd_, &offset_, 4096);
+      std::cout << "sendfile " << fd_ << " : offset is " << offset_ << '\n'; 
       if (sendlen < 0) {
         break;
       }
     }
     return sendlen;
+  }
+
+  bool finish() {
+    int rest = filelen_ - offset_;
+    if(rest) {
+      return false;
+    }
+    return true;
   }
 
   int close() {
