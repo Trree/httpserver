@@ -1,6 +1,7 @@
 #ifndef HTTP_SREVER_BUFFER_HPP_
 #define HTTP_SREVER_BUFFER_HPP_
 
+#include "file.hpp"
 #include <string.h>
 #include <string>
 
@@ -44,9 +45,19 @@ public:
     ready_ = true;
   }
 
+  void setFile(std::string& filename) {
+    File file(filename);
+    file_ = std::move(file);
+  }
+
+  void send(int fd) {
+    file_.sendfile(fd);
+  }
+
 private:
   std::string request_;
   bool ready_{false};
+  File file_;
 };
 
 } // namespace httpserver

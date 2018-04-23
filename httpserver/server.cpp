@@ -61,8 +61,8 @@ void HttpServer::handleEvent() {
           if (event.data.u64  == 0) {
             Socket socket= handleAccept();
             int fd = socket.getfd();
-            uint32_t num = connections_manager_.start(std::move(socket));
-            event_.add(fd, num, EPOLLIN|EPOLLET);
+            uint64_t num = connections_manager_.start(std::move(socket));
+            event_.add(fd, num, EPOLLIN| EPOLLOUT |EPOLLET);
           }
           else {
             auto conn = connections_manager_.getConnection(event.data.u64);
@@ -71,8 +71,8 @@ void HttpServer::handleEvent() {
         }
         else if (revents & EPOLLOUT) {
           auto conn = connections_manager_.getConnection(event.data.u64);
-          conn->start();
-          std::cout << "epoll_wait epollout: handle" << '\n' ;
+          std::cout << "epoll_wait epollout: handle " << conn->getfd() << " : " << event.data.u64 << '\n' ;
+          conn->sendfile();
         }
       } catch (const std::exception& e) {
         std::cout << e.what() << '\n';

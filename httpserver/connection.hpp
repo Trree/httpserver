@@ -51,6 +51,11 @@ public:
     return socket_.getfd();
   }
 
+  int sendfile() {
+    buffer_.send(socket_.getfd());
+    return 0;
+  }
+
   int handleWrite(std::string response);
   bool handleRead();
   int Read(char* buffer, size_t size); 
@@ -59,6 +64,10 @@ public:
   }
   bool getKeepalive() {
     return keepalive_;
+  }
+
+  void setFile(std::string& filename) {
+    buffer_.setFile(filename);
   }
 
 private:
