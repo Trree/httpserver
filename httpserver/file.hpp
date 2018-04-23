@@ -54,12 +54,15 @@ public:
   }
 
   int close() {
-    int ret = ::close(fd_);
+    int ret = 0;
+    if (fd_ != -1) {
+      ret = ::close(fd_);
+      std::cout << "close filename " << name_ <<" : " << fd_ << '\n'; 
+    }
     return ret;
   }
 
   ~File() {
-    std::cout << "close filename " << name_ <<" : " << fd_ << '\n'; 
     close();
   }
 
