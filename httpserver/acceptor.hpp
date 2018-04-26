@@ -19,7 +19,7 @@ public:
 
   explicit Acceptor(int fd) {
     socklen_t peer_addr_len = sizeof(struct sockaddr_storage);
-    conn_sock_ = accept(fd, (struct sockaddr *) &peer_addr_, &peer_addr_len);
+    conn_sock_ = ::accept(fd, (struct sockaddr *) &peer_addr_, &peer_addr_len);
     if (conn_sock_.getfd() == -1) {
       perror("listen");
       exit(EXIT_FAILURE);
@@ -59,6 +59,10 @@ public:
   Acceptor& operator=(Acceptor&& other) {
     swap(*this, other);
     return *this;
+  }
+
+  ~Acceptor() {
+    std::cout << "Distructor Acceptor " << conn_sock_.getfd() << '\n'; 
   }
 
 private:

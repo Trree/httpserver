@@ -17,15 +17,16 @@ public:
   File& operator=(const File&) = delete;
 
   File() : fd_(-1) {}
-  explicit File(std::string filename) 
-  : name_(filename), offset_(0) 
+  File(int fd) : fd_(fd) {}
+  File(std::string filename) 
+  : name_(filename), isopen_(false), offset_(0) 
   {
     fd_ = open(filename.c_str(), O_RDONLY);
+    isopen_ = true;
     struct stat st;
     stat(filename.c_str() ,&st);
     filelen_ = st.st_size;
   }
-  explicit File(int fd) : fd_(fd) {}
 
   void swap(File& lhr, File& rhr) {
     using std::swap;
@@ -65,7 +66,7 @@ public:
 
   int close() {
     int ret = 0;
-    if (fd_ != -1) {
+    if (isopen_ && fd_ != -1) {
       ret = ::close(fd_);
       std::cout << "close filename " << name_ <<" : " << fd_ << '\n'; 
     }
@@ -79,6 +80,7 @@ public:
 private:
   int fd_;
   std::string name_;
+  bool isopen_;
   off_t offset_;
   int filelen_;
 };

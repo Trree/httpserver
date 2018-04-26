@@ -21,7 +21,8 @@ public:
 
   Socket() : fd_(-1) {}
   Socket(int fd) : fd_(fd) {}
-  Socket(const std::string& addr, const std::string& port) {
+  
+  void bindAddress(const std::string& addr, const std::string& port) {
     AddrinfoGuard result(handleInetAddress(addr, port));
     struct addrinfo *rp;
 
@@ -30,8 +31,9 @@ public:
                    rp->ai_protocol);
       if (fd_ == -1)
         continue;
+      setReuseAddr();
 
-      if (bind(fd_ , rp->ai_addr, rp->ai_addrlen) == 0)
+      if (::bind(fd_ , rp->ai_addr, rp->ai_addrlen) == 0)
         break;                  /* Success */
       close(fd_);
     }
@@ -98,7 +100,7 @@ public:
   }
 
 private:
-  int fd_;
+  const int fd_;
 };
 
 } // namespace httpserver

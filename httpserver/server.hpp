@@ -15,19 +15,17 @@ public:
   
   explicit HttpServer(const std::string& ip = "::", 
                       const std::string& port = "9999")
-  : socket_(ip, port), event_(){
+  : event_(){
+    socket_.bindAddress(ip, port);
     socket_.listen();
     event_.add(socket_.getfd(), 0, EPOLLIN);
   }
-
   ~HttpServer() {}
 
   void handleEvent();
-
 private:
-
   Socket handleAccept();
-
+  
   Socket socket_;
   Event event_;
   ConnectionManager connections_manager_;
