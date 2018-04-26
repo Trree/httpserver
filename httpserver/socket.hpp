@@ -27,8 +27,7 @@ public:
     struct addrinfo *rp;
 
     for (rp = result.info_; rp != NULL; rp = rp->ai_next) {
-      fd_ = socket(rp->ai_family, rp->ai_socktype,
-                   rp->ai_protocol);
+      fd_ = ::socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
       if (fd_ == -1)
         continue;
       setReuseAddr();
@@ -100,7 +99,7 @@ public:
   }
 
 private:
-  const int fd_;
+  int fd_;
 };
 
 } // namespace httpserver
