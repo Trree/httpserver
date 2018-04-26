@@ -22,10 +22,10 @@ public:
   Socket() : fd_(-1) {}
   Socket(int fd) : fd_(fd) {}
   Socket(const std::string& addr, const std::string& port) {
+    AddrinfoGuard result(handleInetAddress(addr, port));
     struct addrinfo *rp;
-    struct addrinfo* result = handleInetAddress(addr, port);
 
-    for (rp = result; rp != NULL; rp = rp->ai_next) {
+    for (rp = result.info_; rp != NULL; rp = rp->ai_next) {
       fd_ = socket(rp->ai_family, rp->ai_socktype,
                    rp->ai_protocol);
       if (fd_ == -1)
@@ -40,7 +40,6 @@ public:
       fprintf(stderr, "Could not bind\n");
       exit(EXIT_FAILURE);
     }
-    freeaddrinfo(result);
   }
 
   void swap(Socket& first, Socket& second) {
