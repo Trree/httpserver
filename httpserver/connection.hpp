@@ -4,6 +4,7 @@
 #include "socket.hpp"
 #include "buffer.hpp"
 #include "file.hpp"
+#include "acceptor.hpp"
 #include <unistd.h>
 #include <string>
 #include <memory>
@@ -27,15 +28,15 @@ public:
     write
   } status; 
  
-  Connection(Socket&& socket, uint64_t key, ConnectionManager& cm) 
-  : socket_(std::move(socket)), 
+  Connection(Acceptor&& acceptor, uint64_t key, ConnectionManager& cm) 
+  : acceptor_(std::move(acceptor)), 
     key_(key),
     status_(StatusType::established),
     keepalive_(false),
     end_time_(std::chrono::high_resolution_clock::now()),
     connections_manager_(cm) {}
   ~Connection() {
-    std::cout << "destruction connection " << socket_.getfd() << '\n';
+    std::cout << "destruction connection " << acceptor_.getfd() << '\n';
   }
 
   void start(); 
@@ -48,7 +49,7 @@ public:
     status_ = status;
   }
   int getfd() {
-    return socket_.getfd();
+    return acceptor_.getfd();
   }
 
   int handleWrite(std::string response);
@@ -68,7 +69,7 @@ public:
 
   int sendfile() {
     while (!filechain_.empty()) {
-      filechain_.pop(socket_.getfd()); 
+      filechain_.pop(acceptor_.getfd()); 
     }
     if (filechain_.empty() && !getKeepalive()) {
       stop();
@@ -78,7 +79,7 @@ public:
 
 private:
 
-  Socket socket_;
+  Acceptor acceptor_;
   uint64_t key_;
   Buffer buffer_;
   FileChain filechain_;

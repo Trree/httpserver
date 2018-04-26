@@ -34,7 +34,7 @@ int Connection::Read(char* buffer, size_t size)
   std::cout << "Start read ..." << '\n';
   ssize_t n = 0;
   for(;;) {
-    n = recv(socket_.getfd(), buffer, size, 0);
+    n = recv(acceptor_.getfd(), buffer, size, 0);
 
     if (n == 0) {
       return 0;
@@ -42,7 +42,7 @@ int Connection::Read(char* buffer, size_t size)
 
     if (n > 0) {
       buffer_.assignBuffer(buffer, size);
-      std::cout << "recv: fd:" << socket_.getfd() << ' ' << "flag: " << key_ << ' '<< n << " of" << ' ' << size << '\n'; 
+      std::cout << "recv: fd:" << acceptor_.getfd() << ' ' << "flag: " << key_ << ' '<< n << " of" << ' ' << size << '\n'; 
     }
 
     if (n == -1 && errno == EAGAIN) {
@@ -87,7 +87,7 @@ int Connection::handleWrite(std::string response)
 
 
   for (;;) {
-    wlen = send(socket_.getfd(), buffer, size, 0);
+    wlen = send(acceptor_.getfd(), buffer, size, 0);
     if (wlen == 0) {
       std::cout << "send: wlen: " << wlen << " errno: " <<  errno << " " << strerror(errno) << '\n';
       return 0;
@@ -101,7 +101,7 @@ int Connection::handleWrite(std::string response)
       std::cout << "send: wlen: " << wlen << " errno: " <<  errno << " " << strerror(errno) << '\n';
       return -1;
     }
-    std::cout << "send: fd:" << socket_.getfd() << ' ' << wlen << " of" << ' ' << size << '\n'; 
+    std::cout << "send: fd:" << acceptor_.getfd() << ' ' << wlen << " of" << ' ' << size << '\n'; 
     buffer += wlen;
     size -= wlen;
   }

@@ -18,6 +18,7 @@ public:
   Socket(const Socket&) = delete;
   Socket& operator=(const Socket&) = delete;
 
+  Socket() : fd_(-1) {}
   Socket(int fd) : fd_(fd) {}
   explicit Socket(const std::string& addr, const std::string& port) {
     int ret;
