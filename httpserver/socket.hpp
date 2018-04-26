@@ -9,7 +9,8 @@
 #include <string>
 #include <unistd.h>
 #include <fcntl.h>
-#include <string.h>
+#include <string.h> 
+#include <iostream>
 
 namespace httpserver {
 class Socket {
@@ -72,13 +73,17 @@ public:
     freeaddrinfo(result);
   }
 
+  void swap(Socket& first, Socket& second) {
+    using std::swap;
+    swap(first.fd_, second.fd_);
+  }
+
   Socket(Socket&& other) : fd_(other.fd_) {
     other.fd_ = -1;
   }
 
   Socket& operator=(Socket&& other) {
-    fd_ = other.fd_;
-    other.fd_ = -1;
+    swap(*this, other);
     return *this;
   }
 
@@ -96,6 +101,7 @@ public:
   }
 
   ~Socket() {
+    std::cout << "destruction Socket " << fd_ << '\n';
     close(fd_);
     fd_ = -1;
   }

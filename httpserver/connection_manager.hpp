@@ -18,7 +18,7 @@ public:
   ConnectionManager() : max_(0) {}
   ~ConnectionManager(){}
   
-  uint64_t start(Socket socket) {
+  uint64_t start(Socket&& socket) {
     max_++;
     auto search = connections_.find(max_);
     while (max_ == 0 || search != connections_.end()) {

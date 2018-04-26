@@ -7,6 +7,7 @@
 #include <sys/sendfile.h>
 #include <string>
 #include <iostream>
+#include <queue>
 
 namespace httpserver {
 
@@ -82,6 +83,25 @@ private:
   int filelen_;
 };
 
+class FileChain{
+public:
+  FileChain() {}
+  void push(File file) {
+    fs_.push(std::move(file));
+  }
+  void pop(int fd) {
+    fs_.front().sendfile(fd);
+    if (fs_.front().finish()) {
+      fs_.pop();
+    }
+  }
+  bool empty() {
+    return fs_.empty();
+  }
+
+private:
+  std::queue<File> fs_;
+};
 }// namespace httpserver
 
 #endif // HTTP_SREVER_FILE_HPP_

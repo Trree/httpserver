@@ -27,7 +27,7 @@ public:
     write
   } status; 
  
-  Connection(Socket socket, uint64_t key, ConnectionManager& cm) 
+  Connection(Socket&& socket, uint64_t key, ConnectionManager& cm) 
   : socket_(std::move(socket)), 
     key_(key),
     status_(StatusType::established),
@@ -63,19 +63,17 @@ public:
 
   void setFile(std::string filename) {
     File file(filename);
-    file_ = std::move(file);
+    filechain_.push(std::move(file));
   }
 
   int sendfile() {
-    file_.sendfile(socket_.getfd());
-    if (sendfinish() && !getKeepalive()) {
+    while (!filechain_.empty()) {
+      filechain_.pop(socket_.getfd()); 
+    }
+    if (filechain_.empty() && !getKeepalive()) {
       stop();
     }
     return 0;
-  }
-
-  bool sendfinish() {
-    return file_.finish();
   }
 
 private:
@@ -83,7 +81,7 @@ private:
   Socket socket_;
   uint64_t key_;
   Buffer buffer_;
-  File file_;
+  FileChain filechain_;
   StatusType status_{StatusType::closed};
   bool keepalive_;
   int keepalivetimeout_ = 15;

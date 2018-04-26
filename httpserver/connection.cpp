@@ -13,7 +13,7 @@ void Connection::start() {
     std::function<void(std::shared_ptr<Connection>, std::string&)> handleMessage = handleHttpMessage;
     handleMessage(shared_from_this(), buffer_.getBuffer());
     setStatus(StatusType::closed);
-    if (sendfinish() && !getKeepalive()) {
+    if (filechain_.empty() && !getKeepalive()) {
       stop();
     }
   }
