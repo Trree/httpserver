@@ -32,6 +32,7 @@ public:
     using std::swap;
     std::swap(lhr.fd_, rhr.fd_);
     std::swap(lhr.name_, rhr.name_);
+    std::swap(lhr.isopen_, rhr.isopen_);
     std::swap(lhr.offset_, rhr.offset_);
     std::swap(lhr.filelen_, rhr.filelen_);
   }
@@ -51,7 +52,7 @@ public:
       return 0;
     }
     while (offset_ < filelen_) {
-      int sendlen = ::sendfile(fd, fd_, &offset_, 65536);
+      int sendlen = ::sendfile(fd, fd_, &offset_, filelen_);
       std::cout << fd << ":sendfile " << fd_ << " : offset is " << offset_ << '\n'; 
       if (sendlen < 0) {
         break;
