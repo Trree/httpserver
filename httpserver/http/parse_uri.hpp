@@ -25,6 +25,7 @@ public:
     std::cout << requestline << '\n';
     std::string header = request.substr(n, headlen);
     getRequestHeader(header);
+    printHeader();
     body_ = request.substr(headlen + 3);
     request.clear();
   }
@@ -93,7 +94,9 @@ private:
       value = trim(value);
       reqheader_.insert(std::pair<std::string, std::string>(key, value));
     }
+  }
 
+  void printHeader() {
     for (auto p : reqheader_) {
       std::cout << p.first << ":" << p.second << '\n';
     }
