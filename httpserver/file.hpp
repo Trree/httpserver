@@ -78,7 +78,7 @@ public:
   }
 
 private:
-  int fd_;
+  int fd_{-1};
   std::string name_;
   bool isopen_;
   off_t offset_;
@@ -88,7 +88,7 @@ private:
 class FileChain{
 public:
   FileChain() {}
-  void push(File file) {
+  void push(File&& file) {
     fs_.push(std::move(file));
   }
   void pop(int fd) {

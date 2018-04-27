@@ -62,7 +62,9 @@ public:
   }
 
   ~Acceptor() {
-    std::cout << "Distructor Acceptor " << conn_sock_.getfd() << '\n'; 
+    if (conn_sock_.getfd() != -1) {
+      std::cout << "Distructor Acceptor " << conn_sock_.getfd() << '\n'; 
+    }
   }
 
 private:

@@ -33,6 +33,14 @@ public:
     connections_.erase(num);
   }
 
+  bool find(uint64_t num) {
+    auto search = connections_.find(num);
+    if (search != connections_.end()) {
+      return true;
+    }
+    return false;
+  }
+
   connection_ptr getConnection(uint64_t num) {
     return connections_.at(num);
   }

@@ -88,6 +88,9 @@ int Connection::handleWrite(std::string response)
 
   for (;;) {
     wlen = send(acceptor_.getfd(), buffer, size, 0);
+    if (wlen == size) {
+      break;
+    }
     if (wlen == 0) {
       std::cout << "send: wlen: " << wlen << " errno: " <<  errno << " " << strerror(errno) << '\n';
       return 0;

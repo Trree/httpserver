@@ -48,11 +48,15 @@ public:
     swap(first.sockfd_, second.sockfd_);
   }
 
-  Socket(Socket&& other) : sockfd_(other.sockfd_) {
+  //Socket(Socket&&) = default;
+  //Socket& operator=(Socket&&) = default;
+  
+  
+  Socket(Socket&& other) noexcept : sockfd_(std::move(other.sockfd_)) {
     other.sockfd_ = -1;
   }
 
-  Socket& operator=(Socket&& other) {
+  Socket& operator=(Socket&& other) noexcept {
     swap(*this, other);
     return *this;
   }
@@ -71,9 +75,11 @@ public:
   }
 
   ~Socket() {
-    std::cout << "destruction Socket " << sockfd_ << '\n';
-    close(sockfd_);
-    sockfd_ = -1;
+    if (sockfd_ != -1) {
+      std::cout << "destruction Socket " << sockfd_ << '\n';
+      close(sockfd_);
+      sockfd_ = -1;
+    }
   }
 
   void setNonBlocking(){
@@ -99,7 +105,7 @@ public:
   }
 
 private:
-  const int sockfd_;
+  int sockfd_{-1};
 };
 
 } // namespace httpserver

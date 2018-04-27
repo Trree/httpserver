@@ -24,7 +24,8 @@ void HttpServer::handleEvent() {
       auto event = event_.events_[n];
       auto revents = event.events;
       if (revents & (EPOLLERR | EPOLLHUP)) {
-        std::cout << "epoll_wait() error on fd:" << event.data.fd << " ev: " << revents << '\n';
+        std::cout << "epoll_wait() error on fd:" 
+                  << event.data.fd << " ev: " << revents << '\n';
         revents |= EPOLLIN | EPOLLOUT;
       }
       else if (revents & EPOLLRDHUP) {
@@ -32,22 +33,28 @@ void HttpServer::handleEvent() {
       }
 
       try {
-        if (revents & EPOLLIN) {
+        auto flag = connections_manager_.find(event.data.u64);
+        if (revents & EPOLLIN && !flag) {
           if (event.data.u64  == 0) {
             Acceptor acceptor(socket_.getfd());
             acceptor.getInfo();
             int fd = acceptor.getfd();
             uint64_t num = connections_manager_.start(std::move(acceptor));
             event_.add(fd, num, EPOLLIN| EPOLLOUT |EPOLLET);
-          }
-          else {
-            auto conn = connections_manager_.getConnection(event.data.u64);
-            conn->start();
+            continue;
           }
         }
-        else if (revents & EPOLLOUT) {
-          auto conn = connections_manager_.getConnection(event.data.u64);
-          std::cout << "epoll_wait epollout: handle " << conn->getfd() << " : " << event.data.u64 << '\n' ;
+        
+        auto conn = connections_manager_.getConnection(event.data.u64);
+        if (revents & EPOLLIN) {
+            std::cout << "epoll_wait epollin: handle " 
+                      << conn->getfd() << " : " << event.data.u64 << '\n' ;
+            conn->start();
+        }
+
+        if ((revents & EPOLLOUT) && conn->getStatus() > Connection::StatusType::read) {
+          std::cout << "epoll_wait epollout: handle " 
+                    << conn->getfd() << " : " << event.data.u64 << '\n' ;
           conn->sendfile();
         }
       } catch (const std::exception& e) {
@@ -58,4 +65,4 @@ void HttpServer::handleEvent() {
 }
 
 
-}
+} // namespace httpserver

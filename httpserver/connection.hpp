@@ -48,6 +48,10 @@ public:
   void setStatus(StatusType status) {
     status_ = status;
   }
+  StatusType getStatus() {
+    return status_;
+  }
+
   int getfd() {
     return acceptor_.getfd();
   }
