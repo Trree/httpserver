@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <string>
@@ -100,6 +101,14 @@ public:
     int ret = setsockopt(sockfd_, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
     if (ret < 0) {
       printf("Set SO_REUSEADDR %d failed", sockfd_);
+      exit(1);
+    }
+  }
+  void setNoDelay(){
+    int tcp_nodelay = 0;
+    int ret = setsockopt(sockfd_, IPPROTO_TCP, TCP_NODELAY, (const void*)&tcp_nodelay, sizeof(int));
+    if (ret < 0) {
+      printf("Set TCP_NODELAY %d failed", sockfd_);
       exit(1);
     }
   }

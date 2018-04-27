@@ -46,13 +46,13 @@ void HttpServer::handleEvent() {
         }
         
         auto conn = connections_manager_.getConnection(event.data.u64);
-        if (revents & EPOLLIN) {
+        if ((revents & EPOLLIN) && (conn->getStatus() >= Connection::StatusType::established)) {
             std::cout << "epoll_wait epollin: handle " 
                       << conn->getfd() << " : " << event.data.u64 << '\n' ;
             conn->start();
         }
 
-        if ((revents & EPOLLOUT) && conn->getStatus() > Connection::StatusType::read) {
+        if ((revents & EPOLLOUT) && (conn->getStatus() > Connection::StatusType::read)) {
           std::cout << "epoll_wait epollout: handle " 
                     << conn->getfd() << " : " << event.data.u64 << '\n' ;
           conn->sendfile();

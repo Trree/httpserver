@@ -42,7 +42,8 @@ int Connection::Read(char* buffer, size_t size)
 
     if (n > 0) {
       buffer_.assignBuffer(buffer, size);
-      std::cout << "recv: fd:" << acceptor_.getfd() << ' ' << "flag: " << key_ << ' '<< n << " of" << ' ' << size << '\n'; 
+      std::cout << "recv: fd:" << acceptor_.getfd() << ' ' 
+                << "flag: " << key_ << ' '<< n << " of" << ' ' << size << '\n'; 
     }
 
     if (n == -1 && errno == EAGAIN) {
@@ -89,6 +90,7 @@ int Connection::handleWrite(std::string response)
   for (;;) {
     wlen = send(acceptor_.getfd(), buffer, size, 0);
     if (wlen == size) {
+      std::cout << "send: wlen: " << wlen << '\n';
       break;
     }
     if (wlen == 0) {

@@ -21,7 +21,7 @@ public:
   File(std::string filename) 
   : name_(filename), isopen_(false), offset_(0) 
   {
-    fd_ = open(filename.c_str(), O_RDONLY);
+    fd_ = open(filename.c_str(), O_RDONLY | O_NONBLOCK);
     isopen_ = true;
     struct stat st;
     stat(filename.c_str() ,&st);
@@ -46,8 +46,12 @@ public:
 
   int sendfile(int fd) {
     int sendlen = 0;
+    if (fd_ == -1) {
+      std::cout << "Failed file descriptor is -1" << '\n';
+      return 0;
+    }
     while (offset_ < filelen_) {
-      int sendlen = ::sendfile(fd, fd_, &offset_, 4096);
+      int sendlen = ::sendfile(fd, fd_, &offset_, 65536);
       std::cout << fd << ":sendfile " << fd_ << " : offset is " << offset_ << '\n'; 
       if (sendlen < 0) {
         break;

@@ -25,6 +25,7 @@ public:
       exit(EXIT_FAILURE);
     }
     conn_sock_.setNonBlocking();
+    conn_sock_.setNoDelay();
   }
 
   void getInfo() {
