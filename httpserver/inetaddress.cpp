@@ -1,9 +1,33 @@
 #include "inetaddress.hpp"
+#include "handle_string.hpp"
 #include <string.h>
+#include <iostream>
+#include <tuple>
+#include <string>
 
 namespace httpserver {
 
-struct addrinfo* handleInetAddress(const std::string& addr, const std::string& port) {
+std::tuple<std::string, std::string> parseurl(std::string& url)
+{
+  std::string host;
+  std::string port;
+  auto search = url.find_last_of(':');
+  if (search == std::string::npos) {
+    host = "::";
+    port = url;
+  }
+  else {
+    host = url.substr(0, search);
+    port = url.substr(search+1);
+  }
+  if (host.front() == '[') {
+    host = host.substr(1, host.size() - 2);
+  }
+  return std::make_tuple(host, port);
+}
+
+struct addrinfo* handleInetAddress(const std::string& addr, const std::string& port)
+{
   struct addrinfo hints;
   memset(&hints, 0, sizeof(struct addrinfo));
   hints.ai_family = AF_UNSPEC;

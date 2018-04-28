@@ -37,6 +37,13 @@ public:
     }
   }
 
+  std::string get(std::string key) {
+    auto search = conf_.find(key);
+    if (search != conf_.end()) {
+      return search->second;
+    }
+    return std::string();
+  }
 
 private:
   std::string filename_;

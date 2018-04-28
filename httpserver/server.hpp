@@ -13,8 +13,7 @@ public:
   HttpServer(const HttpServer&) = delete;
   HttpServer& operator=(const HttpServer&) = delete;
   
-  explicit HttpServer(const std::string& ip = "::", 
-                      const std::string& port = "9999")
+  explicit HttpServer(const std::string& ip, const std::string& port)
   : event_(){
     socket_.bindAddress(ip, port);
     socket_.listen();

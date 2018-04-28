@@ -9,12 +9,41 @@
 
 using namespace httpserver;
 
-int main()
+int main(int argc, char* argv[]) 
 {
-  ParseConf conf("/home/trree/workspace/github/httpserver/httpserver/conf/http.conf");
+  int opt;
+  std::string filename;
+  while ((opt = getopt(argc, argv, "hc:")) != -1) {
+    switch (opt) {
+    case 'h':
+      fprintf(stderr, "Usage: %s [-c filename]\n", argv[0]);
+      exit(EXIT_SUCCESS);
+    case 'c':
+      filename = optarg;
+      break;
+    default:
+      fprintf(stderr, "Usage: %s [-c filename]\n", argv[0]);
+      exit(EXIT_FAILURE);
+    }
+  }
+
+  if (filename.empty()) {
+    filename = "../conf/http.conf";
+  }
+  ParseConf conf(filename);
   conf.parseConf();
+  auto addr = conf.get("listen");
+  std::string host;
+  std::string port;
+  if (addr.empty()) {
+    host = "::";
+    port = "9999";
+  }
+  else {
+    std::tie(host, port) = parseurl(addr);
+  }
   conf.printConf();
-  HttpServer server("::", "9999");
+  HttpServer server(host, port);
   server.handleEvent();
 
   return 0;
