@@ -23,7 +23,7 @@ std::tuple<std::string, std::string> parseline(std::string line, char delimiter)
 
   auto search = line.find_first_of(delimiter);
   if (search == std::string::npos) {
-    throw std::invalid_argument(line);
+    throw std::invalid_argument(line.c_str());
   }
   auto key = line.substr(0, search);
   auto value = line.substr(search);

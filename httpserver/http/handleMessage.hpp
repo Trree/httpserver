@@ -2,6 +2,7 @@
 #define HTTP_SREVER_HTTP_HANDLEMESSAGE_HPP_
 
 #include "../connection.hpp"
+#include "parsemime.hpp"
 #include "response.hpp"
 #include "parse_uri.hpp"
 #include <memory>
@@ -19,6 +20,9 @@ bool isHttpComplete(std::string buffer) {
 
 void handleHttpMessage(std::shared_ptr<Connection> connptr, std::string& buffer) {
   ParseUri parseuri(buffer);
+  ParseMime parsemime("/home/trree/workspace/github/httpserver/httpserver/conf/mime.types");
+  parsemime.parseMime();
+  parsemime.printMime();
   Response response(connptr);
   if (parseuri.isKeepalive()) {
     connptr->setKeepalive(true);
