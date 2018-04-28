@@ -1,6 +1,7 @@
 #ifndef HTTP_SREVER_PARSE_URI_HPP_
 #define HTTP_SREVER_PARSE_URI_HPP_
 
+#include "../handle_string.hpp"
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -48,28 +49,31 @@ public:
 
   bool isKeepalive() {
     auto search = reqheader_.find("Connection");
-    if (search == reqheader_.end()) {
+    if (version_ != "HTTP/1.1") {
+      if (search == reqheader_.end()) {
+        return false;
+      }
+      std::string data = reqheader_.at("Connection");
+      std::transform(data.begin(), data.end(), data.begin(), ::tolower);
+      if (data == "keep-alive") {
+        return true;
+      }
       return false;
     }
-    std::string data = reqheader_.at("Connection");
-    std::transform(data.begin(), data.end(), data.begin(), ::tolower);
-    if (data == "keep-alive") {
+    else {
+      if (search == reqheader_.end()) {
+        return true;
+      }
+      std::string data = reqheader_.at("Connection");
+      std::transform(data.begin(), data.end(), data.begin(), ::tolower);
+      if (data == "close") {
+        return false;
+      }
       return true;
     }
-    return false;
   }
 
 private:
-
-  std::string& trim(std::string &s)
-  {
-    if (s.empty()){
-      return s;
-    }
-    s.erase(0,s.find_first_not_of(" "));
-    s.erase(s.find_last_not_of(" ") + 1);
-    return s;
-  }
 
   void getRequestHeader(std::string& header) {
     std::istringstream iss(header);
@@ -78,20 +82,15 @@ private:
     std::string value;
     std::string item;
     while (std::getline(iss, item)) {
-      if (item.back() == '\r') {
-        item = item.substr(0, item.size() - 1);
+      std::string key;
+      std::string value;
+      try {
+        std::tie(key, value) = parseline(item, ':');
       }
-      auto n = item.find(':');
-      if (n == std::string::npos) {
+      catch (const std::exception& e) {
+        std::cout << e.what() << '\n';
         continue;
       }
-      key = item.substr(0, n);
-      value = item.substr(n+1);
-      if (key.empty() || value.empty()) {
-        continue;
-      }
-      key = trim(key);
-      value = trim(value);
       reqheader_.insert(std::pair<std::string, std::string>(key, value));
     }
   }

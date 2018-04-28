@@ -20,6 +20,7 @@ add_library(http_runtime SHARED
 )
 
 target_sources(http_runtime PRIVATE
+  handle_string.cpp
   inetaddress.cpp
   connection.cpp
   server.cpp
