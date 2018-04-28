@@ -2,16 +2,37 @@
 #include <tuple>
 #include <string>
 #include <exception>
+#include <iterator>
 
 namespace httpserver {
 
-std::string& trim(std::string &s)
+std::string trim(std::string s)
 {
   if (s.empty()){
     return s;
   }
-  s.erase(0,s.find_first_not_of(" "));
-  s.erase(s.find_last_not_of(" ") + 1);
+  std::string::iterator npos;
+  for (npos = s.begin(); npos != s.end();) {
+    if (std::isspace(*npos)) {
+      npos++;
+    }
+    else {
+      break;
+    }
+  }
+  s.erase(s.begin(), npos);
+
+  std::string::reverse_iterator rnpos;
+  for (rnpos = s.rbegin(); rnpos != s.rend();) {
+    if (std::isspace(*rnpos)) {
+      rnpos++;
+    }
+    else {
+      break;
+    }
+  }
+
+  s.erase(--rnpos.base());
   return s;
 }
 
