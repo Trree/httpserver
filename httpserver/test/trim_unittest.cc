@@ -11,4 +11,6 @@ TEST_CASE("testing the trim function") {
   CHECK(trim("aa ") == base);
   CHECK(trim(" aa ") == base);
   CHECK(trim("     aa   ") == base);
+  CHECK(trim("        ") == "");
+  CHECK(trim("") == "");
 }
