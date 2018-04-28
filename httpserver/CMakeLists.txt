@@ -39,6 +39,6 @@ target_link_libraries(${PROJECT_NAME} http_runtime)
 
 if (Indefinite_ENABLE_TESTING)
   enable_testing()
-  add_test(NAME ${PROJECT_NAME} COMMAND ${PROJECT_NAME})
+  #add_test(NAME ${PROJECT_NAME} COMMAND ${PROJECT_NAME})
   add_subdirectory(test)
 endif()

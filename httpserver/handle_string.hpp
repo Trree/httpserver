@@ -1,6 +1,9 @@
 #ifndef HTTP_SREVER_HANDLE_STRING_HPP_
 #define HTTP_SREVER_HANDLE_STRING_HPP_
 
+#include <string>
+#include <tuple>
+
 namespace httpserver {
 
 std::string trim(std::string s);
