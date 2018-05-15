@@ -1,9 +1,9 @@
-#ifndef HTTP_SREVER_CONNECTION_MANAGER_HPP_
-#define HTTP_SREVER_CONNECTION_MANAGER_HPP_
+#pragma once 
 
 #include "connection.hpp"
 #include <memory>
-#include <set>
+#include <map>
+#include "socket.hpp"
 
 namespace httpserver {
 
@@ -14,22 +14,30 @@ public:
   ConnectionManager(const ConnectionManager&) = delete;
   ConnectionManager& operator=(const ConnectionManager&) = delete;
   
-  ConnectionManager() : max_(0) {}
+  explicit ConnectionManager() : max_(0), connections_() {}
   ~ConnectionManager(){}
   
-  uint64_t start(int fd) {
+  uint64_t start(Acceptor&& acceptor) {
     max_++;
     auto search = connections_.find(max_);
     while (max_ == 0 || search != connections_.end()) {
       max_++;
       search = connections_.find(max_);
     }
-    connections_.insert(std::pair<uint64_t, connection_ptr>(max_, std::make_shared<Connection>(fd, max_, *this)));
+    connections_.insert(std::pair<uint64_t, connection_ptr>(max_, std::make_shared<Connection>(std::move(acceptor), max_, *this)));
     return max_;
   }
 
   void stop(uint64_t num) {
     connections_.erase(num);
+  }
+
+  bool find(uint64_t num) {
+    auto search = connections_.find(num);
+    if (search != connections_.end()) {
+      return true;
+    }
+    return false;
   }
 
   connection_ptr getConnection(uint64_t num) {
@@ -57,4 +65,3 @@ private:
 };
 
 } // namespace httpserver
-#endif // HTTP_SREVER_CONNECTION_MANAGER_HPP__

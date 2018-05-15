@@ -1,6 +1,6 @@
-#ifndef HTTP_SREVER_BUFFER_HPP_
-#define HTTP_SREVER_BUFFER_HPP_
+#pragma once 
 
+#include "file.hpp"
 #include <string.h>
 #include <string>
 
@@ -9,8 +9,9 @@ namespace httpserver {
 class Buffer {
 public:
   Buffer(const Buffer&) = delete;
-  Buffer(Buffer&&) = default;
   Buffer& operator=(const Buffer&) = delete;
+  
+  Buffer(Buffer&&) = default;
   Buffer& operator=(Buffer&&) = default;
 
   Buffer() {}
@@ -27,7 +28,7 @@ public:
     return request_;
   }
 
-  const std::string getBuffer() const {
+  std::string& getBuffer() {
     return request_;
   }
 
@@ -50,4 +51,3 @@ private:
 
 } // namespace httpserver
 
-#endif // HTTP_SREVER_BUFFER_HPP_
