@@ -1,6 +1,6 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.h"
-#include "../handle_string.hpp"
+#include "../httpserver/handle_string.hpp"
 #include <string>
 
 using namespace httpserver;

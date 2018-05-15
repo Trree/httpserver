@@ -1,6 +1,6 @@
 
 add_library(http_testtime SHARED
-  ../handle_string.cpp 
+  ${HTTP_DIR}/handle_string.cpp 
 )
 target_sources(http_testtime PRIVATE
   trim_unittest.cc

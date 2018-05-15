@@ -31,7 +31,6 @@ set(
   "${CMAKE_CURRENT_SOURCE_DIR}:${CMAKE_CURRENT_BINARY_DIR}"
 )
 
-
 add_library(http_runtime SHARED
     ${HTTP_DIR}/http/response.cpp 
 )
@@ -44,18 +43,26 @@ target_sources(http_runtime PRIVATE
     ${HTTP_DIR}/main.cpp
 )
 
+target_include_directories(http_runtime
+  PUBLIC
+    ${HTTP_INCLUDE_DIRECTORIES}
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+)
 # add the binary tree to the search path for include files
 # so that we will find TutorialConfig.h
 ADD_DEFINITIONS(-std=c++11 -g3 -W -Wall -pedantic -D_GNU_SOURCE)
 
 # add the executable
-#add_executable(${PROJECT_NAME} http/request.cpp http/response.cpp connection.cpp server.cpp main.cpp)
-add_executable(${PROJECT_NAME}  ${HTTP_DIR}/main.cpp)
+add_executable(${PROJECT_NAME}  
+  ${HTTP_DIR}/main.cpp
+  #$<TARGET_OBJECTS:http_runtime>
+)
 
 target_link_libraries(${PROJECT_NAME} http_runtime)
 
 if (HTTPSERVER_ENABLE_TESTING)
   enable_testing()
   #add_test(NAME ${PROJECT_NAME} COMMAND ${PROJECT_NAME})
-  #add_subdirectory(httpserver/test)
+  add_subdirectory(test)
 endif()
+
