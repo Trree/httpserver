@@ -14,7 +14,7 @@ public:
   ConnectionManager(const ConnectionManager&) = delete;
   ConnectionManager& operator=(const ConnectionManager&) = delete;
   
-  ConnectionManager() : max_(0) {}
+  explicit ConnectionManager() : max_(0), connections_() {}
   ~ConnectionManager(){}
   
   uint64_t start(Acceptor&& acceptor) {

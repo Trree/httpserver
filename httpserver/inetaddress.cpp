@@ -7,7 +7,7 @@
 
 namespace httpserver {
 
-std::tuple<std::string, std::string> parseurl(std::string& url)
+std::tuple<std::string, std::string> parseurl(const std::string& url)
 {
   std::string host;
   std::string port;

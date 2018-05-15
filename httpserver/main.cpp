@@ -6,6 +6,7 @@
  ************************************************************************/
 #include "server.hpp"
 #include "parseconf.hpp"
+#include "inetaddress.hpp"
 
 using namespace httpserver;
 

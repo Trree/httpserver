@@ -12,8 +12,8 @@ public:
   HttpServer(const HttpServer&) = delete;
   HttpServer& operator=(const HttpServer&) = delete;
   
-  explicit HttpServer(const std::string& ip, const std::string& port)
-  : event_(){
+  HttpServer(const std::string& ip, const std::string& port)
+  : socket_(), event_(), connections_manager_(){
     socket_.bindAddress(ip, port);
     socket_.listen();
     event_.add(socket_.getfd(), 0, EPOLLIN);

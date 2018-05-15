@@ -41,7 +41,7 @@ public:
     }
   }
 
-  std::string get(std::string key) {
+  const std::string get(std::string key) const {
     auto search = conf_.find(key);
     if (search != conf_.end()) {
       return search->second;

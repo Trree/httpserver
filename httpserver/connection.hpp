@@ -25,7 +25,7 @@ public:
     established,
     read,
     write
-  } status; 
+  } ; 
  
   Connection(Acceptor&& acceptor, uint64_t key, ConnectionManager& cm) 
   : acceptor_(std::move(acceptor)), 

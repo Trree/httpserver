@@ -18,7 +18,7 @@ public:
 
   explicit Acceptor(int fd) {
     socklen_t peer_addr_len = sizeof(struct sockaddr_storage);
-    conn_sock_ = ::accept(fd, (struct sockaddr *) &peer_addr_, &peer_addr_len);
+    conn_sock_ = ::accept(fd, reinterpret_cast<struct sockaddr *>(&peer_addr_), &peer_addr_len);
     if (conn_sock_.getfd() == -1) {
       perror("listen");
       exit(EXIT_FAILURE);
@@ -31,7 +31,7 @@ public:
     int ret;
     socklen_t peer_addr_len = sizeof(struct sockaddr_storage);
     char host[NI_MAXHOST], service[NI_MAXSERV];
-    ret = getnameinfo((struct sockaddr *) &peer_addr_,
+    ret = getnameinfo(reinterpret_cast<struct sockaddr *>(&peer_addr_),
                     peer_addr_len, host, NI_MAXHOST,
                     service, NI_MAXSERV, NI_NUMERICSERV);
     if (ret == 0) {

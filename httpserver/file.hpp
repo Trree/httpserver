@@ -51,7 +51,7 @@ public:
       return 0;
     }
     while (offset_ < filelen_) {
-      int sendlen = ::sendfile(fd, fd_, &offset_, filelen_);
+      sendlen = ::sendfile(fd, fd_, &offset_, filelen_);
       std::cout << fd << ":sendfile " << fd_ << " : offset is " << offset_ << '\n'; 
       if (sendlen < 0) {
         break;

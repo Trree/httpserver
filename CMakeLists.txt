@@ -51,6 +51,8 @@ target_include_directories(http_runtime
 # add the binary tree to the search path for include files
 # so that we will find TutorialConfig.h
 ADD_DEFINITIONS(-std=c++11 -g3 -W -Wall -pedantic -D_GNU_SOURCE)
+include(${CMAKE_MODULE_PATH}/clang-cxx-dev-tools.cmake)
+#include(${CMAKE_MODULE_PATH}/common.cmake)
 
 # add the executable
 add_executable(${PROJECT_NAME}  

@@ -17,7 +17,7 @@ public:
   Response(const Response&) = delete;
   Response& operator=(const Response&) = delete;
   
-  Response(std::shared_ptr<Connection> connptr) : connptr_(connptr){}
+  Response(std::shared_ptr<Connection> connptr) : connptr_(connptr), response_(), re_(), body_(){}
   void handleResponse(std::string path, std::string rootdir);
   std::string getBody(std::string path, std::string rootdir);
 
