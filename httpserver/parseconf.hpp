@@ -15,6 +15,11 @@ public:
   void parseConf() {
     std::ifstream input(filename_.c_str());
     for (std::string line; getline(input, line);) {
+      line = trim(line);
+      if (line.front() == '#') {
+        continue;
+      }
+
       std::string key;
       std::string value;
       try {

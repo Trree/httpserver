@@ -12,34 +12,27 @@ using namespace httpserver;
 int main(int argc, char* argv[]) 
 {
   int opt;
-  std::string filename;
-  while ((opt = getopt(argc, argv, "hc:")) != -1) {
+  std::string filename("../conf/http.conf");
+  std::string host("::");
+  std::string port("9999");
+  while ((opt = getopt(argc, argv, "hc:")) != EOF) {
     switch (opt) {
     case 'h':
       fprintf(stderr, "Usage: %s [-c filename]\n", argv[0]);
-      exit(EXIT_SUCCESS);
+      exit(1);
     case 'c':
       filename = optarg;
       break;
     default:
       fprintf(stderr, "Usage: %s [-c filename]\n", argv[0]);
-      exit(EXIT_FAILURE);
+      exit(1);
     }
   }
 
-  if (filename.empty()) {
-    filename = "../conf/http.conf";
-  }
   ParseConf conf(filename);
   conf.parseConf();
   auto addr = conf.get("listen");
-  std::string host;
-  std::string port;
-  if (addr.empty()) {
-    host = "::";
-    port = "9999";
-  }
-  else {
+  if (!addr.empty()) {
     std::tie(host, port) = parseurl(addr);
   }
   conf.printConf();
