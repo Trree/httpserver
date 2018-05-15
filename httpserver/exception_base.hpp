@@ -1,5 +1,4 @@
-#ifndef HTTP_SERVER_EXCEPTION_BASE_HPP_
-#define HTTP_SERVER_EXCEPTION_BASE_HPP_
+#pragma once 
 
 #include <exception>
 
@@ -9,5 +8,3 @@ struct ExceptionBase : virtual std::exception {};
 struct FileOpenErr : virtual ExceptionBase{};
 
 } // namespace httpserver 
-
-#endif // HTTP_SERVER_EXCEPTION_BASE_HPP_

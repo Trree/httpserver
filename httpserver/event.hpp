@@ -1,5 +1,4 @@
-#ifndef HTTP_SREVER_EVENT_HPP_
-#define HTTP_SREVER_EVENT_HPP_ 
+#pragma once 
 
 #include <sys/epoll.h>
 
@@ -42,5 +41,3 @@ public:
 };
 
 }
-
-#endif // HTTP_SREVER_EVENT_HPP_

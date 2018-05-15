@@ -1,5 +1,4 @@
-#ifndef HTTP_SREVER_INETADDRESS_HPP_
-#define HTTP_SREVER_INETADDRESS_HPP_ 
+#pragma once 
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -22,4 +21,3 @@ std::tuple<std::string, std::string> parseurl(std::string& url);
 
 
 } // namespace httpserver
-#endif // HTTP_SREVER_INETADDRESS_HPP_

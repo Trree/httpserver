@@ -1,5 +1,4 @@
-#ifndef HTTP_SREVER_RESPONSE_HPP_
-#define HTTP_SREVER_RESPONSE_HPP_
+#pragma once 
 
 #include <string>
 #include <vector>
@@ -47,7 +46,4 @@ private:
   std::string body_;
 };
 
-
 }// namespace httpserver
-
-#endif // HTTP_SREVER_RESPONSE_HPP_ 

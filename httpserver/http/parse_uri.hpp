@@ -1,5 +1,4 @@
-#ifndef HTTP_SREVER_PARSE_URI_HPP_
-#define HTTP_SREVER_PARSE_URI_HPP_
+#pragma once 
 
 #include "../handle_string.hpp"
 #include <string>
@@ -121,4 +120,3 @@ private:
 };
 
 } // namespace httpserver
-#endif // HTTP_SREVER_PARSE_URI_HPP__

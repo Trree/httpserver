@@ -1,5 +1,4 @@
-#ifndef HTTP_SREVER_HTTP_HANDLEMESSAGE_HPP_
-#define HTTP_SREVER_HTTP_HANDLEMESSAGE_HPP_
+#pragma once 
 
 #include "../connection.hpp"
 #include "parsemime.hpp"
@@ -32,4 +31,3 @@ void handleHttpMessage(std::shared_ptr<Connection> connptr, std::string& buffer)
 
 } // namespace httpserver
 
-#endif // HTTP_SREVER_HTTP_HANDLEMESSAGE_HPP_

@@ -1,5 +1,4 @@
-#ifndef HTTP_SREVER_SOCKET_HPP_
-#define HTTP_SREVER_SOCKET_HPP_
+#pragma once 
 
 #include "inetaddress.hpp"
 #include <sys/types.h>
@@ -119,4 +118,3 @@ private:
 
 } // namespace httpserver
 
-#endif // HTTP_SREVER_SOCKET_HPP_

@@ -1,5 +1,4 @@
-#ifndef HTTP_SREVER_FILE_HPP_
-#define HTTP_SREVER_FILE_HPP_
+#pragma once 
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -111,4 +110,3 @@ private:
 };
 }// namespace httpserver
 
-#endif // HTTP_SREVER_FILE_HPP_

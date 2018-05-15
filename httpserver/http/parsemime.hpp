@@ -1,5 +1,4 @@
-#ifndef HTTP_SREVER_HTTP_PARSEMIME_HPP_
-#define HTTP_SREVER_HTTP_PARSEMINE_HPP_
+#pragma once 
 
 #include "../handle_string.hpp"
 #include <string>
@@ -48,4 +47,3 @@ private:
 };
 
 } // namespace httpserver
-#endif // HTTP_SREVER_HTTP_PARSEMIME_HPP_

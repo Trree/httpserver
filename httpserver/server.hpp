@@ -1,5 +1,4 @@
-#ifndef HTTP_SREVER_SERVER_HPP_
-#define HTTP_SREVER_SERVER_HPP_ 
+#pragma once 
 
 #include "connection_manager.hpp"
 #include "socket.hpp"
@@ -32,4 +31,3 @@ private:
 
 } //namespace httpserver
 
-#endif // HTTP_SREVER_SERVER_HPP_

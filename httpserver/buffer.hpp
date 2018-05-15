@@ -1,5 +1,4 @@
-#ifndef HTTP_SREVER_BUFFER_HPP_
-#define HTTP_SREVER_BUFFER_HPP_
+#pragma once 
 
 #include "file.hpp"
 #include <string.h>
@@ -52,4 +51,3 @@ private:
 
 } // namespace httpserver
 
-#endif // HTTP_SREVER_BUFFER_HPP_

@@ -1,5 +1,4 @@
-#ifndef HTTP_SREVER_CONNECTION_MANAGER_HPP_
-#define HTTP_SREVER_CONNECTION_MANAGER_HPP_
+#pragma once 
 
 #include "connection.hpp"
 #include <memory>
@@ -66,4 +65,3 @@ private:
 };
 
 } // namespace httpserver
-#endif // HTTP_SREVER_CONNECTION_MANAGER_HPP__

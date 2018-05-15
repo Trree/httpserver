@@ -1,5 +1,4 @@
-#ifndef HTTP_SREVER_ACCEPTOR_HPP_
-#define HTTP_SREVER_ACCEPTOR_HPP_
+#pragma once 
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -73,5 +72,3 @@ private:
   struct sockaddr_storage peer_addr_;
 };
 } // namespace httpserver
-
-#endif // HTTP_SREVER_ACCEPTOR_HPP_
