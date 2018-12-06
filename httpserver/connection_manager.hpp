@@ -18,9 +18,7 @@ public:
   ConnectionManager(connection_ptr c) {
     connections_.insert(c);
   }
-  ~ConnectionManager(){
-    std::cout << "destruction ConnectionManager." << '\n';
-  }
+  ~ConnectionManager(){}
   void start(connection_ptr conn) {
     connections_.insert(conn);
   }
@@ -36,8 +34,5 @@ private:
   std::set<connection_ptr> connections_;
 };
 
-
 } // namespace httpserver
-
 #endif // HTTP_SREVER_CONNECTION_MANAGER_HPP__
-

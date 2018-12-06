@@ -25,7 +25,7 @@ public:
   : fd_(fd), 
     connections_manager_(cm) {}
   ~Connection() {
-    std::cout << "destruction connection" << '\n';
+    std::cout << "destruction connection " << fd_ << '\n';
     close(fd_);
     fd_ = -1;
   }

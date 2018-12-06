@@ -10,6 +10,7 @@ void Connection::start() {
     Request req(buffer_.getBuffer());
     std::string response = req.handleRequest();
     handleWrite(response);
+    stop();
   }
   else {
     stop();
@@ -19,7 +20,8 @@ void Connection::start() {
 void Connection::stop() 
 {
   connections_manager_.stop(shared_from_this());
-  throw std::logic_error("connection stop");
+  // can't throw exception, because it in the loop.
+  //throw std::logic_error("connection stop");
 }
 
 int Connection::getFd() 
@@ -94,6 +96,7 @@ int Connection::Read(char* buffer, size_t size)
         buffer_.setReady();
         break;
       }
+      std::cout << "read: rlen: " << n << " errno: " <<  errno << " " << strerror(errno) << '\n';
       return -1;
     }
   } 

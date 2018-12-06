@@ -54,15 +54,18 @@ public:
             std::cout << "epoll_wait() error on fd:" << event.data.fd << " ev: " << revents << '\n';
             revents |= EPOLLIN | EPOLLOUT;
           }
+          else if (revents & EPOLLRDHUP) {
+            std::cout << "EPOLLRDHUP" << '\n';
+          }
           
           if (revents & EPOLLIN) {
             if (event.data.fd  == listen_fd_) {
               int fd = handleAccept(listen_fd_);
-              auto conn = std::make_shared<Connection>(fd, connections_manager_);
-              connections_manager_.start(conn);
+              auto connptr = std::make_shared<Connection>(fd, connections_manager_);
+              connections_manager_.start(connptr);
               struct epoll_event ev;
               ev.events = EPOLLIN | EPOLLET;
-              ev.data.ptr = static_cast<void*>(conn.get());
+              ev.data.ptr = static_cast<void*>(connptr.get());
               if (epoll_ctl(event_.getEpollFd(), EPOLL_CTL_ADD, fd, &ev) == -1) {
                 std::cout << "epoll_ctl failed. fd is " << fd << '\n';
                 perror("epoll_ctl: fd_");
@@ -70,8 +73,9 @@ public:
               }
               continue;
             }
-            // conn的生命周期由connctions_manager_管理，它只有一个引用指向conn，手动清除的时候可以自动清除
-            auto conn = ((Connection *)(event.data.ptr));
+            // connctions_manager_ manage the lifetime of connection.
+            // when earse the connecion. The connection would distruction.
+            auto conn = static_cast<Connection *>(event.data.ptr);
             conn->start();
           }
           else if (revents & EPOLLOUT) {
@@ -83,7 +87,6 @@ public:
         std::cout << e.what() << '\n';
       }
     }
-    connections_manager_.stop_all();
   }
 
 private:
